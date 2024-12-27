@@ -53,50 +53,62 @@ export default async function FolderPage({ params }: FolderPageProps) {
       where: {
         userId: user.id,
         folderId: folder.id
+      },
+      orderBy: {
+        createdAt: 'desc'
       }
     }),
     db.folder.findMany({
       where: {
-        userId: user.id,  
+        userId: user.id,
         parentId: folder.id
+      },
+      orderBy: {
+        createdAt: 'desc'
       }
     })
   ])
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      {/* Breadcrumb navigation */}
-      <div className="flex items-center gap-2 text-sm">
-        <Link href="/library" className="text-blue-500 hover:text-blue-600">
-          Library
-        </Link>
-        {folder.parent && (
-          <>
-            <ChevronRightIcon className="h-4 w-4" />
-            <Link
-              href={`/folder/${folder.parent.id}`}
-              className="text-blue-500 hover:text-blue-600"
-            >
-              {folder.parent.name}
-            </Link>
-          </>
-        )}
-        <ChevronRightIcon className="h-4 w-4" />
-        <span className="font-medium">{folder.name}</span>
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sm">
+          <Link href="/library" className="text-stripe-muted hover:text-stripe-text transition-colors">
+            Library
+          </Link>
+          {folder.parent && (
+            <>
+              <ChevronRightIcon className="h-4 w-4 text-stripe-muted" />
+              <Link
+                href={`/folder/${folder.parent.id}`}
+                className="text-stripe-muted hover:text-stripe-text transition-colors"
+              >
+                {folder.parent.name}
+              </Link>
+            </>
+          )}
+          <ChevronRightIcon className="h-4 w-4 text-stripe-muted" />
+          <span className="text-stripe-text font-medium">{folder.name}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <CreateFileDialog folderId={folder.id} />
+          <CreateFolderDialog parentId={folder.id} />
+        </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <CreateFileDialog folderId={folder.id} />
-        <CreateFolderDialog parentId={folder.id} />
-      </div>
-
-      <div className="flex flex-col gap-1">
+      <div className="rounded-lg border border-stripe-border bg-white shadow-stripe">
         {folders.length === 0 && files.length === 0 ? (
-          <div className="text-center text-gray-500 py-8">
-            This folder is empty. Create a new file or folder to get started.
+          <div className="flex flex-col items-center justify-center py-12 px-4">
+            <p className="text-stripe-muted text-center mb-4">
+              This folder is empty. Create a new file or folder to get started.
+            </p>
+            <div className="flex gap-3">
+              <CreateFileDialog folderId={folder.id} />
+              <CreateFolderDialog parentId={folder.id} />
+            </div>
           </div>
         ) : (
-          <>
+          <div className="divide-y divide-stripe-border">
             {/* Show folders first */}
             {folders.map((subfolder) => (
               <FolderItem
@@ -115,7 +127,7 @@ export default async function FolderPage({ params }: FolderPageProps) {
                 onRename={renameFile}
               />
             ))}
-          </>
+          </div>
         )}
       </div>
     </div>

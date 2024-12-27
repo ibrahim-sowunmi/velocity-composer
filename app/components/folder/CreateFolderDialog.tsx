@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createFolder } from '@/app/actions/folder'
+import { FolderPlusIcon } from 'lucide-react'
 
 interface CreateFolderDialogProps {
   parentId?: string
@@ -29,41 +30,42 @@ export function CreateFolderDialog({ parentId }: CreateFolderDialogProps) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 bg-white text-stripe-text text-sm font-medium rounded-md hover:bg-stripe-light border border-stripe-border shadow-stripe-sm hover:shadow-stripe transition-all"
       >
+        <FolderPlusIcon className="h-4 w-4" />
         New Folder
       </button>
 
       {open && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg w-96">
-            <h2 className="text-xl font-bold mb-4">Create New Folder</h2>
+        <div className="fixed inset-0 bg-stripe-text/10 flex items-center justify-center backdrop-blur-sm z-50">
+          <div className="bg-white p-6 rounded-lg w-[28rem] shadow-stripe relative">
+            <h2 className="text-xl font-semibold text-stripe-text mb-4">Create New Folder</h2>
             <form action={handleSubmit}>
               <input
                 type="text"
                 name="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full p-2 border rounded mb-2"
+                className="w-full px-3 py-2 text-sm border border-stripe-border rounded shadow-stripe-sm focus:border-stripe-primary focus:ring-1 focus:ring-stripe-primary outline-none"
                 placeholder="Enter folder name"
               />
               {error && (
-                <p className="text-sm text-red-500 mb-4">{error}</p>
+                <p className="text-sm text-stripe-danger mt-2">{error}</p>
               )}
-              <div className="flex justify-end gap-2 mt-4">
+              <div className="flex justify-end gap-3 mt-6">
                 <button
                   type="button"
                   onClick={() => {
                     setOpen(false)
                     setError(null)
                   }}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                  className="px-4 py-2 text-sm text-stripe-muted hover:text-stripe-text transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+                  className="px-4 py-2 bg-stripe-primary text-white text-sm font-medium rounded-md hover:bg-stripe-primary-dark shadow-stripe-sm hover:shadow-stripe transition-all"
                 >
                   Create
                 </button>

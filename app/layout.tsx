@@ -1,20 +1,25 @@
+import { Inter, Open_Sans } from 'next/font/google'
 import './globals.css'
-import { Inter } from 'next/font/google'
 import Navbar from './components/Navbar'
 
-const inter = Inter({ subsets: ['latin'] })
+const openSans = Open_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-open-sans',
+})
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className={openSans.variable}>
+      <body className="min-h-screen bg-[#f6f9fc] font-sans antialiased">
         <Navbar />
-        {children}
+        <main className="mx-auto max-w-7xl p-6">
+          {children}
+        </main>
       </body>
     </html>
   )

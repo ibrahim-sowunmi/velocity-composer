@@ -49,25 +49,31 @@ export default async function Library() {
     })
   ])
 
-
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <h1 className="text-2xl font-bold">
-        {session.user.name || 'My'} Library
-      </h1>
-
-      <div className="flex items-center gap-4">
-        <CreateFileDialog />
-        <CreateFolderDialog />
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold text-stripe-text">
+          {session.user.name || 'My'} Library
+        </h1>
+        <div className="flex items-center gap-3">
+          <CreateFileDialog />
+          <CreateFolderDialog />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="rounded-lg border border-stripe-border bg-white shadow-stripe">
         {folders.length === 0 && files.length === 0 ? (
-          <div className="text-center text-gray-500 py-8">
-            No items yet. Create a new file or folder to get started.
+          <div className="flex flex-col items-center justify-center py-12 px-4">
+            <p className="text-stripe-muted text-center mb-4">
+              No items yet. Create a new file or folder to get started.
+            </p>
+            <div className="flex gap-3">
+              <CreateFileDialog />
+              <CreateFolderDialog />
+            </div>
           </div>
         ) : (
-          <>
+          <div className="divide-y divide-stripe-border">
             {/* Show folders first */}
             {folders.map((folder) => (
               <FolderItem
@@ -86,7 +92,7 @@ export default async function Library() {
                 onRename={renameFile}
               />
             ))}
-          </>
+          </div>
         )}
       </div>
     </div>

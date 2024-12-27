@@ -45,10 +45,12 @@ export function FileItem({ file, onDelete, onRename }: FileItemProps) {
   }
 
   return (
-    <div className="group flex items-center justify-between p-2 rounded-md hover:bg-gray-100">
-      <div className="flex items-center gap-2">
-        <FileIcon className="h-4 w-4 text-gray-500" />
-        <div className="flex flex-col">
+    <div className="group relative flex items-center justify-between px-6 py-4 hover:bg-stripe-light transition-colors duration-200">
+      <div className="flex items-center gap-4">
+        <div className="w-8 h-8 flex items-center justify-center rounded-full bg-stripe-border-light">
+          <FileIcon className="h-4 w-4 text-stripe-muted" />
+        </div>
+        <div className="flex flex-col min-w-0">
           {isEditing ? (
             <input
               type="text"
@@ -56,28 +58,28 @@ export function FileItem({ file, onDelete, onRename }: FileItemProps) {
               onChange={(e) => setNewName(e.target.value)}
               onBlur={handleRename}
               onKeyDown={handleKeyDown}
-              className="border rounded px-2 py-1 text-sm"
+              className="px-3 py-1.5 text-sm border border-stripe-border rounded-lg shadow-stripe-sm focus:border-stripe-primary focus:ring-1 focus:ring-stripe-primary outline-none"
               autoFocus
             />
           ) : (
-            <span className="text-sm">
+            <span className="text-[15px] text-stripe-text truncate font-medium">
               {file.name}
             </span>
           )}
-          {error && <span className="text-xs text-red-500">{error}</span>}
+          {error && <span className="text-xs text-stripe-danger mt-1">{error}</span>}
         </div>
       </div>
       
-      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
           onClick={() => setIsEditing(true)}
-          className="p-1 text-gray-500 hover:text-gray-700 rounded-md hover:bg-gray-200"
+          className="p-2 text-stripe-muted hover:text-stripe-text rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
         >
           <PencilIcon className="h-4 w-4" />
         </button>
         <button
           onClick={handleDelete}
-          className="p-1 text-red-500 hover:text-red-700 rounded-md hover:bg-red-50"
+          className="p-2 text-stripe-danger hover:text-stripe-danger-dark rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
         >
           <Trash2Icon className="h-4 w-4" />
         </button>
