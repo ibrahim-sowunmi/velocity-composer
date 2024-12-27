@@ -6,13 +6,19 @@ import { CreateFileDialog } from "@/app/components/file/CreateFileDialog"
 import { CreateFolderDialog } from "@/app/components/folder/CreateFolderDialog"
 import { deleteFile, renameFile } from "@/app/actions/file"
 import { deleteFolder, renameFolder } from "@/app/actions/folder"
+import Link from "next/link"
+import { ChevronRightIcon } from "lucide-react"
 
-export default async function Library() {
+interface FolderPageProps {
+  params: Promise<{
+    id: string
+  }>
+}
+
+export default async function FolderPage({ params }: FolderPageProps) {
+  const { id } = await params
   const session = await auth()
-  if (!session || !session.user) {
-    console.log("No session or user")
-    return null
-  }
+  if (!session || !session.user) return null
 
   const user = await db.user.findUnique({
     where: {
@@ -27,52 +33,75 @@ export default async function Library() {
     return { success: false, error: 'User not found' }
   }
 
-  // Get root level items (no parent)
+  const folder = await db.folder.findUnique({
+    where: {
+      id,
+      userId: user.id
+    },
+    include: {
+      parent: true
+    }
+  })
+
+  if (!folder) {
+    return <div>Folder not found</div>
+  }
+
+  // Get items in this folder
   const [files, folders] = await Promise.all([
     db.file.findMany({
       where: {
         userId: user.id,
-        folderId: null // No parent folder
-      },
-      orderBy: {
-        createdAt: 'desc'
+        folderId: folder.id
       }
     }),
     db.folder.findMany({
       where: {
-        userId: user.id,
-        parentId: null // No parent folder
-      },
-      orderBy: {
-        createdAt: 'desc'
+        userId: user.id,  
+        parentId: folder.id
       }
     })
   ])
 
-
   return (
     <div className="flex flex-col gap-6 p-6">
-      <h1 className="text-2xl font-bold">
-        {session.user.name || 'My'} Library
-      </h1>
+      {/* Breadcrumb navigation */}
+      <div className="flex items-center gap-2 text-sm">
+        <Link href="/library" className="text-blue-500 hover:text-blue-600">
+          Library
+        </Link>
+        {folder.parent && (
+          <>
+            <ChevronRightIcon className="h-4 w-4" />
+            <Link
+              href={`/folder/${folder.parent.id}`}
+              className="text-blue-500 hover:text-blue-600"
+            >
+              {folder.parent.name}
+            </Link>
+          </>
+        )}
+        <ChevronRightIcon className="h-4 w-4" />
+        <span className="font-medium">{folder.name}</span>
+      </div>
 
       <div className="flex items-center gap-4">
-        <CreateFileDialog />
-        <CreateFolderDialog />
+        <CreateFileDialog folderId={folder.id} />
+        <CreateFolderDialog parentId={folder.id} />
       </div>
 
       <div className="flex flex-col gap-1">
         {folders.length === 0 && files.length === 0 ? (
           <div className="text-center text-gray-500 py-8">
-            No items yet. Create a new file or folder to get started.
+            This folder is empty. Create a new file or folder to get started.
           </div>
         ) : (
           <>
             {/* Show folders first */}
-            {folders.map((folder) => (
+            {folders.map((subfolder) => (
               <FolderItem
-                key={folder.id}
-                folder={folder}
+                key={subfolder.id}
+                folder={subfolder}
                 onDelete={deleteFolder}
                 onRename={renameFolder}
               />
@@ -91,4 +120,4 @@ export default async function Library() {
       </div>
     </div>
   )
-}
+} 
