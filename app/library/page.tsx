@@ -52,8 +52,8 @@ export default async function Library() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-stripe-text">
-          {session.user.name || 'My'} Library
+        <h1 className=" font-bold text-stripe-text">
+          {(session.user.name?.split(' ')[0] || 'Undefined')}'s Library
         </h1>
         <div className="flex items-center gap-3">
           <CreateFileDialog />

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { File } from '@prisma/client'
-import { FileIcon, PencilIcon, Trash2Icon } from 'lucide-react'
+import { FileIcon, PencilIcon, Trash2Icon, PenToolIcon } from 'lucide-react'
 
 interface FileItemProps {
   file: File
@@ -32,6 +32,10 @@ export function FileItem({ file, onDelete, onRename }: FileItemProps) {
     if (!result.success) {
       setError(result.error || 'Failed to delete')
     }
+  }
+
+  const handleCompose = () => {
+    alert(`Composing: ${file.name}`)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -71,6 +75,12 @@ export function FileItem({ file, onDelete, onRename }: FileItemProps) {
       </div>
       
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <button
+          onClick={handleCompose}
+          className="p-2 text-stripe-primary hover:text-stripe-primary-dark rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
+        >
+          <PenToolIcon className="h-4 w-4" />
+        </button>
         <button
           onClick={() => setIsEditing(true)}
           className="p-2 text-stripe-muted hover:text-stripe-text rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
