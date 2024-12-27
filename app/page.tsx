@@ -1,9 +1,6 @@
-import { Navbar } from './components/Navbar'
-
 export default function Home() {
   return (
     <>
-      <Navbar />
       <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white">
         <div className="text-center space-y-8 p-8">
           <h1 className="text-5xl font-bold text-gray-800">
