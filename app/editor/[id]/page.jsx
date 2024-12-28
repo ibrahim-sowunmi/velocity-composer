@@ -5,6 +5,7 @@ import "@measured/puck/puck.css"
 import { useEffect, useState } from "react"
 import { use } from "react"
 import { getFileData, saveFileData } from "@/app/actions/file"
+import { puckConfig } from "@/app/config/puck"
 
 // Custom Publish Button Component
 const CustomPublishButton = ({ fileId }) => {
@@ -67,22 +68,6 @@ const CustomPublishButton = ({ fileId }) => {
       `}</style>
     </button>
   )
-}
-
-// Create Puck component config
-const config = {
-  components: {
-    HeadingBlock: {
-      fields: {
-        children: {
-          type: "text",
-        },
-      },
-      render: ({ children }) => {
-        return <h1>{children}</h1>
-      },
-    },
-  },
 }
 
 // Editor Component
@@ -154,7 +139,7 @@ function Editor({ fileId }) {
   return (
     <div className="h-screen">
       <Puck 
-        config={config} 
+        config={puckConfig} 
         data={data}
         overrides={{
           headerActions: () => <CustomPublishButton fileId={fileId} />

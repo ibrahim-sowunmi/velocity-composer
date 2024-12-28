@@ -4,31 +4,56 @@ import { Render } from "@measured/puck"
 import { useEffect, useState } from "react"
 import { getFileData } from "@/app/actions/file"
 import { use } from "react"
-import { config } from "@/app/editor/[id]/config"
+import { puckConfig } from "@/app/config/puck"
 
 export default function ViewPage({ params }) {
   const unwrappedParams = use(params)
-  const [data, setData] = useState(null)
+  const [data, setData] = useState({ content: [], root: {} })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    let mounted = true
     const loadData = async () => {
       try {
+        setLoading(true)
+        setError(null)
+        
         const result = await getFileData(unwrappedParams.id)
+        
+        if (!mounted) return
+        
         if (!result.success) {
-          setError(result.error || 'Failed to load file')
-          setLoading(false)
-          return
+          throw new Error(result.error || 'Failed to load file')
         }
-        setData(result.puckData || {})
-        setLoading(false)
+        
+        // Ensure we have valid Puck data structure
+        const puckData = result.puckData || { content: [], root: {} }
+        if (!puckData.content || !puckData.root) {
+          puckData.content = []
+          puckData.root = {}
+        }
+        
+        if (mounted) {
+          setData(puckData)
+        }
       } catch (err) {
-        setError('Failed to load file')
-        setLoading(false)
+        console.error('Load error:', err)
+        if (mounted) {
+          setError(err.message || 'Failed to load file')
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false)
+        }
       }
     }
+    
     loadData()
+    
+    return () => {
+      mounted = false
+    }
   }, [unwrappedParams.id])
 
   if (loading) {
@@ -41,11 +66,11 @@ export default function ViewPage({ params }) {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
         <div className="text-stripe-danger">{error}</div>
       </div>
     )
   }
 
-  return <Render config={config} data={data} />
+  return <Render config={puckConfig} data={data} />
 }
