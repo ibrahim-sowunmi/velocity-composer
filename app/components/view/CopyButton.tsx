@@ -25,24 +25,69 @@ export function CopyButton({ getContent }: CopyButtonProps) {
 
       // Try the modern clipboard API first
       if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(content)
+        try {
+          // Create a blob with HTML content type
+          const htmlBlob = new Blob([content], { type: 'text/html' })
+          // Also create a plain text version
+          const plainTextBlob = new Blob([content.replace(/<[^>]+>/g, '')], { type: 'text/plain' })
+          
+          const clipboardItem = new ClipboardItem({
+            'text/html': htmlBlob,
+            'text/plain': plainTextBlob
+          })
+          await navigator.clipboard.write([clipboardItem])
+        } catch (err) {
+          // If modern approach fails, try the selection approach
+          const tempDiv = document.createElement('div')
+          tempDiv.innerHTML = content
+          tempDiv.style.position = 'fixed'
+          tempDiv.style.pointerEvents = 'none'
+          tempDiv.style.opacity = '0'
+          document.body.appendChild(tempDiv)
+          
+          const range = document.createRange()
+          range.selectNodeContents(tempDiv)
+          
+          const selection = window.getSelection()
+          if (selection) {
+            selection.removeAllRanges()
+            selection.addRange(range)
+            
+            try {
+              document.execCommand('copy')
+            } catch (execErr) {
+              throw new Error('Copy failed')
+            } finally {
+              selection.removeAllRanges()
+              tempDiv.remove()
+            }
+          }
+        }
       } else {
         // Fallback for older browsers
-        const textArea = document.createElement('textarea')
-        textArea.value = content
-        textArea.style.position = 'fixed'
-        textArea.style.left = '-999999px'
-        textArea.style.top = '-999999px'
-        document.body.appendChild(textArea)
-        textArea.focus()
-        textArea.select()
+        const tempDiv = document.createElement('div')
+        tempDiv.innerHTML = content
+        tempDiv.style.position = 'fixed'
+        tempDiv.style.pointerEvents = 'none'
+        tempDiv.style.opacity = '0'
+        document.body.appendChild(tempDiv)
         
-        try {
-          document.execCommand('copy')
-          textArea.remove()
-        } catch (err) {
-          textArea.remove()
-          throw new Error('Copy failed')
+        const range = document.createRange()
+        range.selectNodeContents(tempDiv)
+        
+        const selection = window.getSelection()
+        if (selection) {
+          selection.removeAllRanges()
+          selection.addRange(range)
+          
+          try {
+            document.execCommand('copy')
+          } catch (err) {
+            throw new Error('Copy failed')
+          } finally {
+            selection.removeAllRanges()
+            tempDiv.remove()
+          }
         }
       }
 
@@ -89,4 +134,4 @@ export function CopyButton({ getContent }: CopyButtonProps) {
       </button>
     </div>
   )
-} 
+}

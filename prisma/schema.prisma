@@ -102,8 +102,8 @@ model File {
   // Optional relation to folder (file can exist without folder)
   folderId    String?
   folder      Folder?   @relation(fields: [folderId], references: [id])
-  // Product list stored as JSON
-  productList Json[]
+  // Product list stored as Array of Strings
+  productList String[]
   // Puck data stored as JSON
   puckData    Json
   // Relation to user who owns this file

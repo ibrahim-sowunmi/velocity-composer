@@ -4,9 +4,12 @@ import { useState } from 'react'
 import { File } from '@prisma/client'
 import { FileIcon, PencilIcon, Trash2Icon, PenToolIcon } from 'lucide-react'
 import Link from 'next/link'
+import { puckConfig } from '@/app/config/puck'
 
 interface FileItemProps {
-  file: File
+  file: File & {
+    productList: string[]
+  }
   onDelete: (id: string) => Promise<{ success: boolean; error?: string }>
   onRename: (id: string, newName: string) => Promise<{ success: boolean; error?: string }>
 }
@@ -29,6 +32,12 @@ export function FileItem({ file, onDelete, onRename }: FileItemProps) {
     const formattedMinute = minute.toString().padStart(2, '0')
     
     return `${month} ${day}, ${year}, ${formattedHour}:${formattedMinute} ${ampm}`
+  }
+
+  const getCategoryTitle = (categoryKey: string) => {
+    return (puckConfig.categories[categoryKey as keyof typeof puckConfig.categories]?.title || categoryKey)
+      .replace(/\s*\([^)]*\)/g, '') // Remove anything in parentheses
+      .split(' ')[0] // Take only the first word
   }
 
   const handleRename = async () => {
@@ -85,9 +94,29 @@ export function FileItem({ file, onDelete, onRename }: FileItemProps) {
               <div className="w-8 h-8 flex items-center justify-center rounded-full bg-stripe-border-light group-hover/link:bg-stripe-primary/10 transition-colors">
                 <FileIcon className="h-4 w-4 text-stripe-muted group-hover/link:text-stripe-primary transition-colors" />
               </div>
-              <span className="text-[15px] text-stripe-text truncate font-medium group-hover/link:text-stripe-primary transition-colors">
-                {file.name}
-              </span>
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="text-[15px] text-stripe-text truncate font-medium group-hover/link:text-stripe-primary transition-colors">
+                  {file.name}
+                </span>
+                <div className="flex gap-1.5 flex-wrap">
+                  {file.productList?.slice(0, 3).map((product) => (
+                    <span
+                      key={product}
+                      className="px-2 py-0.5 text-xs font-medium rounded-full bg-stripe-border-light text-stripe-muted"
+                    >
+                      {getCategoryTitle(product)}
+                    </span>
+                  ))}
+                  {file.productList?.length > 3 && (
+                    <span
+                      className="px-2 py-0.5 text-xs font-medium rounded-full bg-stripe-border-light text-stripe-muted"
+                      title={file.productList.slice(3).map(product => getCategoryTitle(product)).join(', ')}
+                    >
+                      +{file.productList.length - 3} more
+                    </span>
+                  )}
+                </div>
+              </div>
             </Link>
             <span className="text-sm text-stripe-muted text-right">
               {formatDate(file.createdAt)}

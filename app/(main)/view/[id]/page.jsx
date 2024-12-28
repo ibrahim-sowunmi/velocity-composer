@@ -20,8 +20,8 @@ export default function ViewPage({ params }) {
     
     return new Promise(resolve => {
       setTimeout(() => {
-        const text = contentRef.current?.textContent || contentRef.current?.innerText || ''
-        resolve(text)
+        const html = contentRef.current?.innerHTML || ''
+        resolve(html)
       }, 100)
     })
   }, [])

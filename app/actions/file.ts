@@ -3,6 +3,7 @@
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
+import { puckConfig } from "@/app/config/puck"
 
 export async function getFileData(id: string) {
   const session = await auth()
@@ -69,13 +70,28 @@ export async function saveFileData(id: string, puckData: any) {
   }
 
   try {
+    // Extract unique categories from the puckData content
+    const productList = new Set<string>()
+    
+    // Analyze each component in the puckData content
+    puckData.content?.forEach((item: any) => {
+      // Find which category this component belongs to
+      for (const [categoryKey, category] of Object.entries(puckConfig.categories)) {
+        if ((category as any).components?.includes(item.type)) {
+          productList.add(categoryKey)
+          break
+        }
+      }
+    })
+
     const file = await db.file.update({
       where: {
         id,
         userId: user.id
       },
       data: {
-        puckData
+        puckData,
+        productList: Array.from(productList)
       }
     })
 
