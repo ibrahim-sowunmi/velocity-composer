@@ -28,7 +28,7 @@ export default function ViewPage({ params }) {
         }
         
         // Ensure we have valid Puck data structure
-        const puckData = result.puckData || { content: [], root: {} }
+        const puckData = result.file.puckData || { content: [], root: {} }
         if (!puckData.content || !puckData.root) {
           puckData.content = []
           puckData.root = {}

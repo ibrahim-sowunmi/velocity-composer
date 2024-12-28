@@ -6,6 +6,39 @@ import { useEffect, useState } from "react"
 import { use } from "react"
 import { getFileData, saveFileData } from "@/app/actions/file"
 import { puckConfig } from "@/app/config/puck"
+import Link from "next/link"
+
+// Navigation Buttons Component
+const NavigationButtons = ({ file }) => {
+  return (
+    <div className="flex items-center gap-4">
+      <Link
+        href={file.folderId ? `/folder/${file.folderId}` : '/library'}
+        className="group flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+      >
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          viewBox="0 0 20 20" 
+          fill="currentColor" 
+          className="w-4 h-4 transition-transform group-hover:-translate-x-0.5"
+        >
+          <path 
+            fillRule="evenodd" 
+            d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" 
+            clipRule="evenodd" 
+          />
+        </svg>
+        Back to Library
+      </Link>
+      <Link
+        href={`/view/${file.id}`}
+        className="px-3 py-1.5 text-sm font-medium text-white bg-[#635bff] rounded-full hover:bg-[#5851db] transition-all duration-200 shadow-sm hover:shadow-md hover:translate-y-[-1px] active:translate-y-0"
+      >
+        View Page
+      </Link>
+    </div>
+  )
+}
 
 // Custom Publish Button Component
 const CustomPublishButton = ({ fileId }) => {
@@ -35,44 +68,27 @@ const CustomPublishButton = ({ fileId }) => {
     <button
       onClick={handleSave}
       disabled={isSaving}
-      style={{
-        backgroundSize: '200% 200%',
-        animation: isSuccess ? 'none' : 'gradient 4s ease infinite',
-      }}
       className={`
-        relative px-6 py-2.5 text-sm font-medium rounded-full 
+        px-3 py-1.5 text-sm font-medium rounded-full
         transition-all duration-200 shadow-sm
         ${isSuccess 
-          ? 'bg-[#0BAB5c] text-white' 
-          : `bg-gradient-to-r from-[#635bff] via-[#8b5cf6] to-[#635bff] text-white
-             hover:shadow-lg hover:translate-y-[-1px]`
+          ? 'bg-[#0BAB5c] text-white hover:bg-[#0a9b52]' 
+          : 'bg-[#635bff] text-white hover:bg-[#5851db]'
         } 
-        disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0
-        before:absolute before:inset-0 before:rounded-full
-        before:bg-gradient-to-r before:from-[#635bff] before:via-[#8b5cf6] before:to-[#635bff]
-        before:animate-[gradient_4s_ease_infinite]
-        before:bg-[length:200%_200%] before:opacity-0 before:transition-opacity
-        hover:before:opacity-100
-        disabled:before:opacity-0
+        hover:shadow-md hover:translate-y-[-1px]
+        active:translate-y-0
+        disabled:opacity-70 disabled:cursor-not-allowed 
+        disabled:hover:translate-y-0 disabled:hover:shadow-sm
       `}
     >
-      <span className="relative z-10">
-        {isSaving ? 'Saving...' : isSuccess ? 'Saved!' : 'Publish'}
-      </span>
-      <style jsx>{`
-        @keyframes gradient {
-          0% { background-position: 0% 50% }
-          50% { background-position: 100% 50% }
-          100% { background-position: 0% 50% }
-        }
-      `}</style>
+      {isSaving ? 'Saving...' : isSuccess ? 'Saved!' : 'Publish'}
     </button>
   )
 }
 
 // Editor Component
 function Editor({ fileId }) {
-  const [data, setData] = useState({ content: [], root: {} })
+  const [fileData, setFileData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -92,14 +108,17 @@ function Editor({ fileId }) {
         }
         
         // Ensure we have valid Puck data structure
-        const puckData = result.puckData || { content: [], root: {} }
+        const puckData = result.file.puckData || { content: [], root: {} }
         if (!puckData.content || !puckData.root) {
           puckData.content = []
           puckData.root = {}
         }
         
         if (mounted) {
-          setData(puckData)
+          setFileData({
+            ...result.file,
+            puckData
+          })
         }
       } catch (err) {
         console.error('Load error:', err)
@@ -140,9 +159,15 @@ function Editor({ fileId }) {
     <div className="h-screen">
       <Puck 
         config={puckConfig} 
-        data={data}
+        data={fileData.puckData}
         overrides={{
-          headerActions: () => <CustomPublishButton fileId={fileId} />
+          headerTitle: fileData.name,
+          headerActions: () => (
+            <div className="flex items-center gap-4">
+              <NavigationButtons file={fileData} />
+              <CustomPublishButton fileId={fileId} />
+            </div>
+          )
         }}
       />
     </div>

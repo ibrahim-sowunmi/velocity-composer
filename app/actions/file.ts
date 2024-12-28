@@ -28,6 +28,14 @@ export async function getFileData(id: string) {
       where: {
         id,
         userId: user.id
+      },
+      select: {
+        id: true,
+        name: true,
+        folderId: true,
+        puckData: true,
+        createdAt: true,
+        updatedAt: true
       }
     })
 
@@ -35,7 +43,7 @@ export async function getFileData(id: string) {
       return { success: false, error: 'File not found' }
     }
 
-    return { success: true, puckData: file.puckData }
+    return { success: true, file }
   } catch (error) {
     return { success: false, error: 'Failed to get file data' }
   }
