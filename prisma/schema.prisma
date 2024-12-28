@@ -104,6 +104,8 @@ model File {
   folder      Folder?   @relation(fields: [folderId], references: [id])
   // Product list stored as JSON
   productList Json[]
+  // Puck data stored as JSON
+  puckData    Json
   // Relation to user who owns this file
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)

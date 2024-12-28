@@ -10,7 +10,6 @@ import { deleteFolder, renameFolder } from "@/app/actions/folder"
 export default async function Library() {
   const session = await auth()
   if (!session || !session.user) {
-    console.log("No session or user")
     return null
   }
 
@@ -24,7 +23,11 @@ export default async function Library() {
   })
 
   if (!user) {
-    return { success: false, error: 'User not found' }
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-stripe-danger">User not found</div>
+      </div>
+    )
   }
 
   // Get root level items (no parent)
@@ -52,8 +55,8 @@ export default async function Library() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className=" font-bold text-stripe-text">
-          {(session.user.name?.split(' ')[0] || 'Undefined')}'s Library
+        <h1 className="text-2xl font-bold text-stripe-text">
+          {(session.user.name?.split(' ')[0] || 'My')} Library
         </h1>
         <div className="flex items-center gap-3">
           <CreateFileDialog />

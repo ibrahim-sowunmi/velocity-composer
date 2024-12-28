@@ -4,14 +4,87 @@ import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
-export async function createFile(formData: FormData) {
+export async function getFileData(id: string) {
   const session = await auth()
-
   if (!session || !session.user) {
     return { success: false, error: 'Unauthorized' }
   }
-  
-  // Get userId by looking up the email
+
+  const user = await db.user.findUnique({
+    where: {
+      email: session.user.email as string,
+    },
+    select: {
+      id: true
+    }
+  })
+
+  if (!user) {
+    return { success: false, error: 'User not found' }
+  }
+
+  try {
+    const file = await db.file.findUnique({
+      where: {
+        id,
+        userId: user.id
+      }
+    })
+
+    if (!file) {
+      return { success: false, error: 'File not found' }
+    }
+
+    return { success: true, puckData: file.puckData }
+  } catch (error) {
+    return { success: false, error: 'Failed to get file data' }
+  }
+}
+
+export async function saveFileData(id: string, puckData: any) {
+  const session = await auth()
+  if (!session || !session.user) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  const user = await db.user.findUnique({
+    where: {
+      email: session.user.email as string,
+    },
+    select: {
+      id: true
+    }
+  })
+
+  if (!user) {
+    return { success: false, error: 'User not found' }
+  }
+
+  try {
+    const file = await db.file.update({
+      where: {
+        id,
+        userId: user.id
+      },
+      data: {
+        puckData
+      }
+    })
+
+    revalidatePath('/library')
+    revalidatePath(`/editor/${id}`)
+    return { success: true, file }
+  } catch (error) {
+    return { success: false, error: 'Failed to save file data' }
+  }
+}
+
+export async function createFile(formData: FormData) {
+  const session = await auth()
+  if (!session || !session.user) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
   const user = await db.user.findUnique({
     where: {
       email: session.user.email as string,
@@ -31,13 +104,14 @@ export async function createFile(formData: FormData) {
   if (!name) {
     return { success: false, error: 'Name is required' }
   }
-  
+
   try {
     const file = await db.file.create({
       data: {
         name,
         folderId: folderId || null,
         userId: user.id,
+        puckData: {},
         productList: []
       }
     })
@@ -56,11 +130,24 @@ export async function deleteFile(id: string) {
     return { success: false, error: 'Unauthorized' }
   }
 
+  const user = await db.user.findUnique({
+    where: {
+      email: session.user.email as string,
+    },
+    select: {
+      id: true
+    }
+  })
+
+  if (!user) {
+    return { success: false, error: 'User not found' }
+  }
+
   try {
     const file = await db.file.delete({
       where: { 
         id,
-        userId: session.user.id as string
+        userId: user.id
       }
     })
 
@@ -78,6 +165,19 @@ export async function renameFile(id: string, newName: string) {
     return { success: false, error: 'Unauthorized' }
   }
 
+  const user = await db.user.findUnique({
+    where: {
+      email: session.user.email as string,
+    },
+    select: {
+      id: true
+    }
+  })
+
+  if (!user) {
+    return { success: false, error: 'User not found' }
+  }
+
   if (!newName.trim()) {
     return { success: false, error: 'Name is required' }
   }
@@ -86,7 +186,7 @@ export async function renameFile(id: string, newName: string) {
     const file = await db.file.update({
       where: { 
         id,
-        userId: session.user.id as string
+        userId: user.id
       },
       data: { name: newName }
     })

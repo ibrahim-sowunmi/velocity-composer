@@ -8,21 +8,18 @@ import { deleteFile, renameFile } from "@/app/actions/file"
 import { deleteFolder, renameFolder } from "@/app/actions/folder"
 import Link from "next/link"
 import { ChevronRightIcon } from "lucide-react"
+import { signOut } from "@/auth"
+import { redirect } from "next/navigation"
 
-interface FolderPageProps {
-  params: Promise<{
-    id: string
-  }>
-}
-
-export default async function FolderPage({ params }: FolderPageProps) {
-  const { id } = await params
+export default async function FolderPage({ params }) {
   const session = await auth()
-  if (!session || !session.user) return null
+  if (!session || !session.user) {
+    return null
+  }
 
   const user = await db.user.findUnique({
     where: {
-      email: session.user.email as string,
+      email: session.user.email,
     },
     select: {
       id: true
@@ -30,12 +27,13 @@ export default async function FolderPage({ params }: FolderPageProps) {
   })
 
   if (!user) {
-    return { success: false, error: 'User not found' }
+    await signOut({ redirectTo: '/' })
+    redirect('/')
   }
 
   const folder = await db.folder.findUnique({
     where: {
-      id,
+      id: params.id,
       userId: user.id
     },
     include: {
@@ -44,7 +42,17 @@ export default async function FolderPage({ params }: FolderPageProps) {
   })
 
   if (!folder) {
-    return <div>Folder not found</div>
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <div className="text-stripe-danger">Folder not found</div>
+        <Link 
+          href="/library" 
+          className="text-stripe-primary hover:text-stripe-primary-dark transition-colors"
+        >
+          Return to Library
+        </Link>
+      </div>
+    )
   }
 
   // Get items in this folder
