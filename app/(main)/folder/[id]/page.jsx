@@ -12,7 +12,11 @@ import { signOut } from "@/auth"
 import { redirect } from "next/navigation"
 
 export default async function FolderPage({ params }) {
+  
+  const { id } = await params
+  
   const session = await auth()
+  
   if (!session || !session.user) {
     return null
   }
@@ -33,13 +37,14 @@ export default async function FolderPage({ params }) {
 
   const folder = await db.folder.findUnique({
     where: {
-      id: params.id,
+      id: id,
       userId: user.id
     },
     include: {
       parent: true
     }
   })
+
 
   if (!folder) {
     return (
@@ -55,7 +60,7 @@ export default async function FolderPage({ params }) {
     )
   }
 
-  // Get items in this folder
+
   const [files, folders] = await Promise.all([
     db.file.findMany({
       where: {

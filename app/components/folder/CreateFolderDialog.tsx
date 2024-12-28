@@ -6,16 +6,17 @@ import { FolderPlusIcon } from 'lucide-react'
 
 interface CreateFolderDialogProps {
   parentId?: string
+  onSubmit?: (formData: FormData) => Promise<{ success: boolean; error?: string; folder?: any }>
 }
 
-export function CreateFolderDialog({ parentId }: CreateFolderDialogProps) {
+export function CreateFolderDialog({ parentId, onSubmit }: CreateFolderDialogProps) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit(formData: FormData) {
     formData.append('parentId', parentId || '')
-    const result = await createFolder(formData)
+    const result = onSubmit ? await onSubmit(formData) : await createFolder(formData)
     
     if (result.success) {
       setOpen(false)

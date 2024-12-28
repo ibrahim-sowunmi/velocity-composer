@@ -6,16 +6,17 @@ import { PlusIcon } from 'lucide-react'
 
 interface CreateFileDialogProps {
   folderId?: string
+  onSubmit?: (formData: FormData) => Promise<{ success: boolean; error?: string; file?: any }>
 }
 
-export function CreateFileDialog({ folderId }: CreateFileDialogProps) {
+export function CreateFileDialog({ folderId, onSubmit }: CreateFileDialogProps) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit(formData: FormData) {
     formData.append('folderId', folderId || '')
-    const result = await createFile(formData)
+    const result = onSubmit ? await onSubmit(formData) : await createFile(formData)
     
     if (result.success) {
       setOpen(false)
