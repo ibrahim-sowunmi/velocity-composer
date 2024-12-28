@@ -1,16 +1,30 @@
 'use client'
 
 import { Render } from "@measured/puck"
-import { useEffect, useState } from "react"
+import "@measured/puck/puck.css"
+import { useEffect, useState, useRef, useCallback } from "react"
 import { getFileData } from "@/app/actions/file"
 import { use } from "react"
 import { puckConfig } from "@/app/config/puck"
+import { CopyButton } from "@/app/components/view/CopyButton"
 
 export default function ViewPage({ params }) {
   const unwrappedParams = use(params)
   const [data, setData] = useState({ content: [], root: {} })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const contentRef = useRef(null)
+
+  const getTextContent = useCallback(() => {
+    if (!contentRef.current) return ''
+    
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const text = contentRef.current?.textContent || contentRef.current?.innerText || ''
+        resolve(text)
+      }, 100)
+    })
+  }, [])
 
   useEffect(() => {
     let mounted = true
@@ -38,7 +52,6 @@ export default function ViewPage({ params }) {
           setData(puckData)
         }
       } catch (err) {
-        console.error('Load error:', err)
         if (mounted) {
           setError(err.message || 'Failed to load file')
         }
@@ -72,5 +85,12 @@ export default function ViewPage({ params }) {
     )
   }
 
-  return <Render config={puckConfig} data={data} />
+  return (
+    <>
+      <div className="relative" ref={contentRef}>
+        <Render config={puckConfig} data={data} />
+      </div>
+      <CopyButton getContent={getTextContent} />
+    </>
+  )
 }

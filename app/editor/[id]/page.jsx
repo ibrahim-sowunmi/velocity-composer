@@ -32,7 +32,7 @@ const NavigationButtons = ({ file }) => {
       </Link>
       <Link
         href={`/view/${file.id}`}
-        className="px-3 py-1.5 text-sm font-medium text-white bg-[#635bff] rounded-full hover:bg-[#5851db] transition-all duration-200 shadow-sm hover:shadow-md hover:translate-y-[-1px] active:translate-y-0"
+        className="inline-flex items-center gap-2 px-4 py-2 bg-stripe-primary text-white text-sm font-medium rounded-md hover:bg-stripe-primary-dark shadow-stripe-sm hover:shadow-stripe transition-all"
       >
         View Page
       </Link>
@@ -69,16 +69,15 @@ const CustomPublishButton = ({ fileId }) => {
       onClick={handleSave}
       disabled={isSaving}
       className={`
-        px-3 py-1.5 text-sm font-medium rounded-full
-        transition-all duration-200 shadow-sm
+        inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md
+        shadow-stripe-sm transition-all
         ${isSuccess 
-          ? 'bg-[#0BAB5c] text-white hover:bg-[#0a9b52]' 
-          : 'bg-[#635bff] text-white hover:bg-[#5851db]'
+          ? 'bg-green-600 text-white hover:bg-green-700' 
+          : 'bg-stripe-primary text-white hover:bg-stripe-primary-dark'
         } 
-        hover:shadow-md hover:translate-y-[-1px]
-        active:translate-y-0
+        hover:shadow-stripe
         disabled:opacity-70 disabled:cursor-not-allowed 
-        disabled:hover:translate-y-0 disabled:hover:shadow-sm
+        disabled:hover:shadow-stripe-sm
       `}
     >
       {isSaving ? 'Saving...' : isSuccess ? 'Saved!' : 'Publish'}
