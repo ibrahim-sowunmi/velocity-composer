@@ -7,17 +7,40 @@ import { CreateFileDialog } from "@/app/components/file/CreateFileDialog"
 import { CreateFolderDialog } from "@/app/components/folder/CreateFolderDialog"
 import { deleteFile, renameFile, createFile } from "@/app/actions/file"
 import { deleteFolder, renameFolder, createFolder } from "@/app/actions/folder"
+import Link from "next/link"
+import { ChevronRightIcon } from "lucide-react"
 import { SortHeader, type SortField, type SortDirection } from "@/app/components/library/SortHeader"
 
-export function LibraryContent({ 
+interface FolderWithParent {
+  id: string
+  name: string
+  parent: {
+    id: string
+    name: string
+  } | null
+  createdAt: Date
+  updatedAt: Date
+  parentId: string | null
+  userId: string
+}
+
+type ViewType = 'library' | 'folder'
+
+interface ContentViewProps {
+  viewType: ViewType
+  initialFiles: any[]
+  initialFolders: any[]
+  userName?: string
+  folder?: FolderWithParent
+}
+
+export function ContentView({ 
+  viewType,
   initialFiles, 
-  initialFolders, 
-  userName 
-}: { 
-  initialFiles: any[], 
-  initialFolders: any[],
-  userName: string
-}) {
+  initialFolders,
+  userName,
+  folder
+}: ContentViewProps) {
   const [sortField, setSortField] = useState<SortField>('name')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
   const [files, setFiles] = useState(initialFiles)
@@ -99,27 +122,74 @@ export function LibraryContent({
     return result
   }
 
-  return (
-    <div className="space-y-8">
+  const renderHeader = () => {
+    if (viewType === 'library') {
+      return (
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold text-stripe-text">
+            {(userName?.split(' ')[0] || 'My').charAt(0).toUpperCase() + (userName?.split(' ')[0] || 'My').slice(1)}'s Library
+          </h1>
+          <div className="flex items-center gap-3">
+            <CreateFileDialog onSubmit={handleCreateFile} />
+            <CreateFolderDialog onSubmit={handleCreateFolder} />
+          </div>
+        </div>
+      )
+    }
+
+    if (!folder) return null
+
+    return (
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-stripe-text">
-          {(userName?.split(' ')[0] || 'My').charAt(0).toUpperCase() + (userName?.split(' ')[0] || 'My').slice(1)}'s Library
-        </h1>
+        <div className="flex items-center gap-2 text-sm">
+          <Link href="/library" className="text-stripe-muted hover:text-stripe-text transition-colors">
+            Library
+          </Link>
+          {folder.parent && (
+            <>
+              <ChevronRightIcon className="h-4 w-4 text-stripe-muted" />
+              <Link
+                href={`/folder/${folder.parent.id}`}
+                className="text-stripe-muted hover:text-stripe-text transition-colors"
+              >
+                {folder.parent.name}
+              </Link>
+            </>
+          )}
+          <ChevronRightIcon className="h-4 w-4 text-stripe-muted" />
+          <span className="text-stripe-text font-medium">{folder.name}</span>
+        </div>
         <div className="flex items-center gap-3">
-          <CreateFileDialog onSubmit={handleCreateFile} />
-          <CreateFolderDialog onSubmit={handleCreateFolder} />
+          <CreateFileDialog folderId={folder.id} onSubmit={handleCreateFile} />
+          <CreateFolderDialog parentId={folder.id} onSubmit={handleCreateFolder} />
         </div>
       </div>
+    )
+  }
+
+  const emptyStateMessage = viewType === 'library' 
+    ? "No items yet. Create a new file or folder to get started."
+    : "This folder is empty. Create a new file or folder to get started."
+
+  return (
+    <div className="space-y-8">
+      {renderHeader()}
 
       <div className="rounded-lg border border-stripe-border bg-white shadow-stripe">
         {folders.length === 0 && files.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 px-4">
             <p className="text-stripe-muted text-center mb-4">
-              No items yet. Create a new file or folder to get started.
+              {emptyStateMessage}
             </p>
             <div className="flex gap-3">
-              <CreateFileDialog onSubmit={handleCreateFile} />
-              <CreateFolderDialog onSubmit={handleCreateFolder} />
+              <CreateFileDialog 
+                folderId={folder?.id} 
+                onSubmit={handleCreateFile} 
+              />
+              <CreateFolderDialog 
+                parentId={folder?.id} 
+                onSubmit={handleCreateFolder} 
+              />
             </div>
           </div>
         ) : (
@@ -130,16 +200,14 @@ export function LibraryContent({
               onSort={handleSort}
             />
             <div className="divide-y divide-stripe-border">
-              {/* Show folders first */}
-              {folders.map((folder) => (
+              {folders.map((subfolder) => (
                 <FolderItem
-                  key={folder.id}
-                  folder={folder}
+                  key={subfolder.id}
+                  folder={subfolder}
                   onDelete={handleDeleteFolder}
                   onRename={handleRenameFolder}
                 />
               ))}
-              {/* Then show files */}
               {files.map((file) => (
                 <FileItem
                   key={file.id}

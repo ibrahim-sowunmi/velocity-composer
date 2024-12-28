@@ -160,8 +160,8 @@ function Editor({ fileId }) {
       <Puck 
         config={puckConfig} 
         data={fileData.puckData}
+        headerTitle={fileData.name}
         overrides={{
-          headerTitle: fileData.name,
           headerActions: () => (
             <div className="flex items-center gap-4">
               <NavigationButtons file={fileData} />
