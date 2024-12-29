@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { File } from '@prisma/client'
 import { FileIcon, PencilIcon, Trash2Icon, PenToolIcon, EyeIcon, EyeOffIcon, EyeClosedIcon } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { puckConfig } from '@/app/config/puck'
 import { toggleFileVisibility } from '@/app/actions/file'
 
@@ -16,6 +17,7 @@ interface FileItemProps {
 }
 
 export function FileItem({ file, onDelete, onRename }: FileItemProps) {
+  const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [newName, setNewName] = useState(file.name)
   const [error, setError] = useState<string | null>(null)
@@ -69,11 +71,22 @@ export function FileItem({ file, onDelete, onRename }: FileItemProps) {
     }
   }
 
+  const handleClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on action buttons or if editing
+    if (isEditing || (e.target as HTMLElement).closest('button, a')) {
+      return
+    }
+    router.push(`/view/${file.id}`)
+  }
+
   return (
-    <div className="group relative hover:bg-stripe-light transition-colors duration-200">
+    <div 
+      className="group relative hover:bg-stripe-light transition-colors duration-200 cursor-pointer"
+      onClick={handleClick}
+    >
       <div className="grid grid-cols-[minmax(400px,2fr)_200px_200px_180px] gap-6 items-center px-6 py-4">
         {isEditing ? (
-          <div>
+          <div onClick={e => e.stopPropagation()}>
             <input
               type="text"
               value={newName}
@@ -126,7 +139,7 @@ export function FileItem({ file, onDelete, onRename }: FileItemProps) {
             <span className="text-sm text-stripe-muted whitespace-nowrap">
               {formatDate(file.updatedAt)}
             </span>
-            <div className="flex items-center gap-2 justify-end">
+            <div className="flex items-center gap-2 justify-end" onClick={e => e.stopPropagation()}>
               <Link
                 href={`/editor/${file.id}`}
                 className="p-2 text-stripe-primary hover:text-stripe-primary-dark rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"

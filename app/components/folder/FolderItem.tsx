@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { Folder } from '@prisma/client'
 import { FolderIcon, PencilIcon, Trash2Icon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 
 interface FolderItemProps {
   folder: Folder
@@ -30,10 +29,12 @@ export function FolderItem({ folder, onDelete, onRename }: FolderItemProps) {
     })
   }
 
-  const handleClick = () => {
-    if (!isEditing) {
-      router.push(`/folder/${folder.id}`)
+  const handleClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on action buttons or if editing
+    if (isEditing || (e.target as HTMLElement).closest('button')) {
+      return
     }
+    router.push(`/folder/${folder.id}`)
   }
 
   const handleRename = async () => {
@@ -66,10 +67,13 @@ export function FolderItem({ folder, onDelete, onRename }: FolderItemProps) {
   }
 
   return (
-    <div className="group relative hover:bg-stripe-light transition-colors duration-200">
+    <div 
+      className="group relative hover:bg-stripe-light transition-colors duration-200 cursor-pointer"
+      onClick={handleClick}
+    >
       <div className="grid grid-cols-[minmax(400px,2fr)_200px_200px_180px] gap-6 items-center px-6 py-4">
         {isEditing ? (
-          <div>
+          <div onClick={e => e.stopPropagation()}>
             <input
               type="text"
               value={newName}
@@ -83,27 +87,24 @@ export function FolderItem({ folder, onDelete, onRename }: FolderItemProps) {
           </div>
         ) : (
           <>
-            <Link
-              href={`/folder/${folder.id}`}
-              className="flex items-center gap-4 min-w-0 group/link"
-            >
-              <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-stripe-border-light group-hover/link:bg-stripe-primary/10 transition-colors">
-                <FolderIcon className="h-4 w-4 text-stripe-muted group-hover/link:text-stripe-primary transition-colors" />
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-stripe-border-light group-hover:bg-stripe-primary/10 transition-colors">
+                <FolderIcon className="h-4 w-4 text-stripe-muted group-hover:text-stripe-primary transition-colors" />
               </div>
               <span 
-                className="text-[15px] text-stripe-text truncate font-medium group-hover/link:text-stripe-primary transition-colors"
+                className="text-[15px] text-stripe-text truncate font-medium group-hover:text-stripe-primary transition-colors"
                 title={folder.name}
               >
                 {folder.name}
               </span>
-            </Link>
+            </div>
             <span className="text-sm text-stripe-muted whitespace-nowrap">
               {formatDate(folder.createdAt)}
             </span>
             <span className="text-sm text-stripe-muted whitespace-nowrap">
               {formatDate(folder.updatedAt)}
             </span>
-            <div className="flex items-center gap-2 justify-end">
+            <div className="flex items-center gap-2 justify-end" onClick={e => e.stopPropagation()}>
               <button
                 onClick={() => setIsEditing(true)}
                 className="p-2 text-stripe-muted hover:text-stripe-text rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"

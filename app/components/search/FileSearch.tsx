@@ -177,7 +177,7 @@ export function FileSearch() {
                           key={product}
                           className="px-2 py-0.5 text-xs font-medium rounded-full bg-stripe-border-light text-stripe-muted"
                         >
-                          {product}
+                          {product.toLocaleUpperCase()}
                         </span>
                       ))}
                     </div>
