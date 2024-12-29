@@ -16,6 +16,7 @@ export function FolderItem({ folder, onDelete, onRename }: FolderItemProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [newName, setNewName] = useState(folder.name)
   const [error, setError] = useState<string | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const formatDate = (date: Date) => {
     const d = new Date(date)
@@ -54,6 +55,7 @@ export function FolderItem({ folder, onDelete, onRename }: FolderItemProps) {
     if (!result.success) {
       setError(result.error || 'Failed to delete')
     }
+    setShowDeleteConfirm(false)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -112,7 +114,7 @@ export function FolderItem({ folder, onDelete, onRename }: FolderItemProps) {
                 <PencilIcon className="h-4 w-4" />
               </button>
               <button
-                onClick={handleDelete}
+                onClick={() => setShowDeleteConfirm(true)}
                 className="p-2 text-stripe-danger hover:text-stripe-danger-dark rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
               >
                 <Trash2Icon className="h-4 w-4" />
@@ -121,6 +123,36 @@ export function FolderItem({ folder, onDelete, onRename }: FolderItemProps) {
           </>
         )}
       </div>
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-stripe-text/10 flex items-center justify-center backdrop-blur-sm z-50">
+          <div className="bg-white p-6 rounded-lg w-[28rem] shadow-stripe relative">
+            <h2 className="text-xl font-semibold text-stripe-text mb-4">Delete Folder</h2>
+            <p className="text-sm text-stripe-muted mb-6">
+              Are you sure you want to delete &quot;{folder.name}&quot;? Any files inside will be moved to the parent folder.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 text-sm text-stripe-muted hover:text-stripe-text transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleDelete()
+                  }
+                }}
+                className="px-4 py-2 bg-stripe-danger text-white text-sm font-medium rounded-md hover:bg-stripe-danger-dark shadow-stripe-sm hover:shadow-stripe transition-all"
+                autoFocus
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 

@@ -5,13 +5,9 @@ import { signOut } from "@/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 
-interface PageProps {
-  params: {
-    id: string
-  }
-}
 
-export default async function FolderPage({ params }: PageProps) {
+// ts-expect-error
+export default async function FolderPage({ params }: any) {
   const { id } = await params
   const session = await auth()
   

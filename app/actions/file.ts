@@ -6,6 +6,35 @@ import { revalidatePath } from "next/cache"
 import { puckConfig } from "@/app/config/puck"
 import { Prisma } from "@prisma/client"
 
+// Helper function to update parent folder timestamps
+async function updateParentFolderTimestamps(folderId: string | null, userId: string) {
+  if (!folderId) return;
+  
+  try {
+    let currentFolderId: string | null = folderId;
+    
+    while (currentFolderId) {
+      const parent: { parentId: string | null } = await db.folder.update({
+        where: { 
+          id: currentFolderId,
+          userId: userId
+        },
+        data: {
+          updatedAt: new Date()
+        },
+        select: {
+          parentId: true
+        }
+      });
+      
+      if (!parent) break;
+      currentFolderId = parent.parentId;
+    }
+  } catch (error) {
+    console.error('Failed to update parent folder timestamps:', error);
+  }
+}
+
 export async function getFileData(id: string) {
   const session = await auth()
   if (!session || !session.user) {
@@ -47,7 +76,8 @@ export async function getFileData(id: string) {
 
     return { success: true, file }
   } catch (error) {
-    return { success: false, error: 'Failed to get file data' }
+    console.error('Failed to get file data:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to get file data' }
   }
 }
 
@@ -71,36 +101,45 @@ export async function saveFileData(id: string, puckData: any) {
   }
 
   try {
-    // Extract unique categories from the puckData content
-    const productList = new Set<string>()
-    
-    // Analyze each component in the puckData content
-    puckData.content?.forEach((item: any) => {
-      // Find which category this component belongs to
-      for (const [categoryKey, category] of Object.entries(puckConfig.categories)) {
-        if ((category as any).components?.includes(item.type)) {
-          productList.add(categoryKey)
-          break
+    const result = await db.$transaction(async (tx) => {
+      // Extract unique categories from the puckData content
+      const productList = new Set<string>()
+      
+      // Analyze each component in the puckData content
+      puckData.content?.forEach((item: any) => {
+        // Find which category this component belongs to
+        for (const [categoryKey, category] of Object.entries(puckConfig.categories)) {
+          if ((category as any).components?.includes(item.type)) {
+            productList.add(categoryKey)
+            break
+          }
         }
-      }
-    })
+      })
 
-    const file = await db.file.update({
-      where: {
-        id,
-        userId: user.id
-      },
-      data: {
-        puckData,
-        productList: Array.from(productList)
+      const file = await tx.file.update({
+        where: {
+          id,
+          userId: user.id
+        },
+        data: {
+          puckData,
+          productList: Array.from(productList)
+        }
+      });
+
+      if (file.folderId) {
+        await updateParentFolderTimestamps(file.folderId, user.id);
       }
-    })
+
+      return file;
+    });
 
     revalidatePath('/library')
     revalidatePath(`/editor/${id}`)
-    return { success: true, file }
+    return { success: true, file: result }
   } catch (error) {
-    return { success: false, error: 'Failed to save file data' }
+    console.error('Failed to save file data:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to save file data' }
   }
 }
 
@@ -131,21 +170,30 @@ export async function createFile(formData: FormData) {
   }
 
   try {
-    const file = await db.file.create({
-      data: {
-        name,
-        folderId: folderId || null,
-        userId: user.id,
-        puckData: {},
-        productList: []
+    const result = await db.$transaction(async (tx) => {
+      const file = await tx.file.create({
+        data: {
+          name,
+          folderId: folderId || null,
+          userId: user.id,
+          puckData: {},
+          productList: []
+        }
+      });
+
+      if (folderId) {
+        await updateParentFolderTimestamps(folderId, user.id);
       }
-    })
+
+      return file;
+    });
 
     revalidatePath('/library')
     if (folderId) revalidatePath(`/folder/${folderId}`)
-    return { success: true, file }
+    return { success: true, file: result }
   } catch (error) {
-    return { success: false, error: 'Failed to create file' }
+    console.error('Failed to create file:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to create file' }
   }
 }
 
@@ -169,18 +217,27 @@ export async function deleteFile(id: string) {
   }
 
   try {
-    const file = await db.file.delete({
-      where: { 
-        id,
-        userId: user.id
+    const result = await db.$transaction(async (tx) => {
+      const file = await tx.file.delete({
+        where: { 
+          id,
+          userId: user.id
+        }
+      });
+
+      if (file.folderId) {
+        await updateParentFolderTimestamps(file.folderId, user.id);
       }
-    })
+
+      return file;
+    });
 
     revalidatePath('/library')
-    if (file.folderId) revalidatePath(`/folder/${file.folderId}`)
+    if (result.folderId) revalidatePath(`/folder/${result.folderId}`)
     return { success: true }
   } catch (error) {
-    return { success: false, error: 'Failed to delete file' }
+    console.error('Failed to delete file:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to delete file' }
   }
 }
 
@@ -220,7 +277,8 @@ export async function renameFile(id: string, newName: string) {
     if (file.folderId) revalidatePath(`/folder/${file.folderId}`)
     return { success: true }
   } catch (error) {
-    return { success: false, error: 'Failed to rename file' }
+    console.error('Failed to rename file:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to rename file' }
   }
 }
 
@@ -272,7 +330,8 @@ export async function toggleFileVisibility(id: string) {
     if (updatedFile.folderId) revalidatePath(`/folder/${updatedFile.folderId}`)
     return { success: true, isPublic: updatedFile.isPublic }
   } catch (error) {
-    return { success: false, error: 'Failed to toggle file visibility' }
+    console.error('Failed to toggle file visibility:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to toggle file visibility' }
   }
 }
 
@@ -312,7 +371,8 @@ export async function searchPublicFiles(query: string) {
       }))
     }
   } catch (error) {
-    return { success: false, error: 'Failed to search files' }
+    console.error('Failed to search files:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to search files' }
   }
 }
 
@@ -361,6 +421,85 @@ export async function forkFile(fileId: string) {
     revalidatePath('/library')
     return { success: true, file: forkedFile }
   } catch (error) {
-    return { success: false, error: 'Failed to fork file' }
+    console.error('Failed to fork file:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to fork file' }
+  }
+}
+
+export async function copyFile(id: string) {
+  const session = await auth()
+  if (!session || !session.user) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  const user = await db.user.findUnique({
+    where: {
+      email: session.user.email as string,
+    },
+    select: {
+      id: true
+    }
+  })
+
+  if (!user) {
+    return { success: false, error: 'User not found' }
+  }
+
+  try {
+    // Get the original file
+    const originalFile = await db.file.findUnique({
+      where: { 
+        id,
+        userId: user.id
+      }
+    })
+
+    if (!originalFile) {
+      return { success: false, error: 'File not found' }
+    }
+
+    // Find existing copies to determine the suffix
+    const existingCopies = await db.file.findMany({
+      where: {
+        userId: user.id,
+        name: {
+          startsWith: originalFile.name + ' (copy'
+        }
+      }
+    })
+
+    let newName = `${originalFile.name} (copy)`
+    if (existingCopies.length > 0) {
+      const copyNumbers = existingCopies
+        .map(f => {
+          const match = f.name.match(/\(copy( \d+)?\)$/)
+          if (!match) return 1
+          const num = match[1]
+          return num ? parseInt(num.trim()) : 1
+        })
+        .filter(n => !isNaN(n))
+
+      const maxNumber = Math.max(0, ...copyNumbers)
+      newName = `${originalFile.name} (copy ${maxNumber + 1})`
+    }
+
+    // Create the copy
+    const copiedFile = await db.file.create({
+      data: {
+        name: newName,
+        folderId: originalFile.folderId,
+        userId: user.id,
+        puckData: originalFile.puckData as Prisma.InputJsonValue,
+        productList: originalFile.productList,
+        isPublic: false
+      }
+    })
+
+    revalidatePath('/library')
+    if (copiedFile.folderId) revalidatePath(`/folder/${copiedFile.folderId}`)
+    return { success: true, file: copiedFile }
+  } catch (error) {
+    console.error('Failed to copy file:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to copy file' }
   }
 } 

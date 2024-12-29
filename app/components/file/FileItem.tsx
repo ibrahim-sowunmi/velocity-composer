@@ -2,11 +2,12 @@
 
 import { useState } from 'react'
 import { File } from '@prisma/client'
-import { FileIcon, PencilIcon, Trash2Icon, PenToolIcon, EyeIcon, EyeOffIcon, EyeClosedIcon } from 'lucide-react'
+import { FileIcon, PencilIcon, Trash2Icon, PenToolIcon, EyeIcon, EyeClosedIcon, CopyIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { puckConfig } from '@/app/config/puck'
-import { toggleFileVisibility } from '@/app/actions/file'
+import { toggleFileVisibility, copyFile } from '@/app/actions/file'
+import { getFolderContents } from '@/app/actions/folder'
 
 interface FileItemProps {
   file: File & {
@@ -14,15 +15,18 @@ interface FileItemProps {
   }
   onDelete: (id: string) => Promise<{ success: boolean; error?: string }>
   onRename: (id: string, newName: string) => Promise<{ success: boolean; error?: string }>
+  onCopy?: (files: File[]) => void
 }
 
-export function FileItem({ file, onDelete, onRename }: FileItemProps) {
+export function FileItem({ file, onDelete, onRename, onCopy }: FileItemProps) {
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [newName, setNewName] = useState(file.name)
   const [error, setError] = useState<string | null>(null)
   const [isPublic, setIsPublic] = useState(file.isPublic)
   const [isToggling, setIsToggling] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isCopying, setIsCopying] = useState(false)
 
   const formatDate = (date: Date) => {
     const d = new Date(date)
@@ -59,6 +63,7 @@ export function FileItem({ file, onDelete, onRename }: FileItemProps) {
     if (!result.success) {
       setError(result.error || 'Failed to delete')
     }
+    setShowDeleteConfirm(false)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -77,6 +82,28 @@ export function FileItem({ file, onDelete, onRename }: FileItemProps) {
       return
     }
     router.push(`/view/${file.id}`)
+  }
+
+  const handleCopy = async () => {
+    try {
+      setIsCopying(true)
+      const result = await copyFile(file.id)
+      if (!result.success) {
+        setError(result.error || 'Failed to copy file')
+      } else if (result.file) {
+        // Add the new file to the current view
+        const currentFiles = await getFolderContents(file.folderId || null)
+        if ('files' in currentFiles && currentFiles.files) {
+          // Call the parent component to update the files list
+          onCopy?.(currentFiles.files)
+        }
+      }
+    } catch (err) {
+      console.error('Failed to copy file:', err);
+      setError('Failed to copy file')
+    } finally {
+      setIsCopying(false)
+    }
   }
 
   return (
@@ -147,6 +174,14 @@ export function FileItem({ file, onDelete, onRename }: FileItemProps) {
                 <PenToolIcon className="h-4 w-4" />
               </Link>
               <button
+                onClick={handleCopy}
+                className="p-2 text-stripe-muted hover:text-stripe-text rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
+                title="Create copy"
+                disabled={isCopying}
+              >
+                <CopyIcon className="h-4 w-4" />
+              </button>
+              <button
                 onClick={async () => {
                   if (isToggling) return;
                   setIsToggling(true);
@@ -177,7 +212,7 @@ export function FileItem({ file, onDelete, onRename }: FileItemProps) {
                 <PencilIcon className="h-4 w-4" />
               </button>
               <button
-                onClick={handleDelete}
+                onClick={() => setShowDeleteConfirm(true)}
                 className="p-2 text-stripe-danger hover:text-stripe-danger-dark rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
               >
                 <Trash2Icon className="h-4 w-4" />
@@ -186,6 +221,36 @@ export function FileItem({ file, onDelete, onRename }: FileItemProps) {
           </>
         )}
       </div>
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-stripe-text/10 flex items-center justify-center backdrop-blur-sm z-50">
+          <div className="bg-white p-6 rounded-lg w-[28rem] shadow-stripe relative">
+            <h2 className="text-xl font-semibold text-stripe-text mb-4">Delete File</h2>
+            <p className="text-sm text-stripe-muted mb-6">
+              Are you sure you want to delete &quot;{file.name}&quot;? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 text-sm text-stripe-muted hover:text-stripe-text transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleDelete()
+                  }
+                }}
+                className="px-4 py-2 bg-stripe-danger text-white text-sm font-medium rounded-md hover:bg-stripe-danger-dark shadow-stripe-sm hover:shadow-stripe transition-all"
+                autoFocus
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 

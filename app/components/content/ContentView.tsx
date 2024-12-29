@@ -41,8 +41,8 @@ export function ContentView({
   userName,
   folder
 }: ContentViewProps) {
-  const [sortField, setSortField] = useState<SortField>('name')
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+  const [sortField, setSortField] = useState<SortField>('updatedAt')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [files, setFiles] = useState(initialFiles)
   const [folders, setFolders] = useState(initialFolders)
 
@@ -90,6 +90,8 @@ export function ContentView({
     const result = await deleteFile(id)
     if (result.success) {
       setFiles(prevFiles => prevFiles.filter(file => file.id !== id))
+      setSortField('updatedAt')
+      setSortDirection('desc')
     }
     return result
   }
@@ -98,6 +100,8 @@ export function ContentView({
     const result = await deleteFolder(id)
     if (result.success) {
       setFolders(prevFolders => prevFolders.filter(folder => folder.id !== id))
+      setSortField('updatedAt')
+      setSortDirection('desc')
     }
     return result
   }
@@ -108,6 +112,8 @@ export function ContentView({
       setFiles(prevFiles => prevFiles.map(file => 
         file.id === id ? { ...file, name: newName } : file
       ))
+      setSortField('updatedAt')
+      setSortDirection('desc')
     }
     return result
   }
@@ -118,8 +124,21 @@ export function ContentView({
       setFolders(prevFolders => prevFolders.map(folder => 
         folder.id === id ? { ...folder, name: newName } : folder
       ))
+      setSortField('updatedAt')
+      setSortDirection('desc')
     }
     return result
+  }
+
+  const handleCopyUpdate = (newFiles: any[]) => {
+    const sortedFiles = [...newFiles].sort((a, b) => {
+      const aDate = new Date(a.updatedAt)
+      const bDate = new Date(b.updatedAt)
+      return bDate.getTime() - aDate.getTime() // desc order
+    })
+    setFiles(sortedFiles)
+    setSortField('updatedAt')
+    setSortDirection('desc')
   }
 
   const renderHeader = () => {
@@ -127,7 +146,7 @@ export function ContentView({
       return (
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-stripe-text">
-            {(userName?.split(' ')[0] || 'My').charAt(0).toUpperCase() + (userName?.split(' ')[0] || 'My').slice(1)}'s Library
+            {(userName?.split(' ')[0] || 'My').charAt(0).toUpperCase() + (userName?.split(' ')[0] || 'My').slice(1)}&apos;s Library
           </h1>
           <div className="flex items-center gap-3">
             <CreateFileDialog onSubmit={handleCreateFile} />
@@ -214,6 +233,7 @@ export function ContentView({
                   file={file}
                   onDelete={handleDeleteFile}
                   onRename={handleRenameFile}
+                  onCopy={handleCopyUpdate}
                 />
               ))}
             </div>

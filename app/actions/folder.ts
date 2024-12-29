@@ -4,6 +4,33 @@ import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
+// Helper function to update parent folder timestamps
+async function updateParentFolderTimestamps(folderId: string, userId: string) {
+  try {
+    let currentFolderId: string | null = folderId;
+    
+    while (currentFolderId) {
+      const parent: { parentId: string | null } = await db.folder.update({
+        where: { 
+          id: currentFolderId,
+          userId: userId
+        },
+        data: {
+          updatedAt: new Date()
+        },
+        select: {
+          parentId: true
+        }
+      });
+      
+      if (!parent) break;
+      currentFolderId = parent.parentId;
+    }
+  } catch (error) {
+    console.error('Failed to update parent folder timestamps:', error);
+  }
+}
+
 export async function getFolderContents(folderId: string | null) {
   const session = await auth()
   if (!session || !session.user) {
@@ -103,18 +130,29 @@ export async function createFolder(formData: FormData) {
   }
 
   try {
-    const folder = await db.folder.create({
-      data: {
-        name,
-        parentId: parentId || null,
-        userId: user.id
+    // Use a transaction to ensure data consistency
+    const result = await db.$transaction(async (tx) => {
+      const folder = await tx.folder.create({
+        data: {
+          name,
+          parentId: parentId || null,
+          userId: user.id
+        }
+      });
+
+      // Update parent folder timestamps
+      if (parentId) {
+        await updateParentFolderTimestamps(parentId, user.id);
       }
-    })
+
+      return folder;
+    });
 
     revalidatePath('/library')
     if (parentId) revalidatePath(`/folder/${parentId}`)
-    return { success: true, folder }
-  } catch (error) {
+    return { success: true, folder: result }
+  } catch (error: any) {
+    console.error('Failed to create folder:', error);
     return { success: false, error: 'Failed to create folder' }
   }
 }
@@ -139,18 +177,52 @@ export async function deleteFolder(id: string) {
   }
 
   try {
-    const folder = await db.folder.delete({
-      where: { 
-        id,
-        userId: user.id
+    // Use a transaction to ensure data consistency
+    const result = await db.$transaction(async (tx) => {
+      // First, get the folder to check if it exists and get its parentId
+      const folder = await tx.folder.findUnique({
+        where: { 
+          id,
+          userId: user.id
+        }
+      })
+
+      if (!folder) {
+        throw new Error('Folder not found');
       }
-    })
+
+      // Move all files to the parent folder (or root if no parent)
+      await tx.file.updateMany({
+        where: {
+          folderId: id,
+          userId: user.id
+        },
+        data: {
+          folderId: folder.parentId // null if no parent folder
+        }
+      })
+
+      // Delete the folder
+      await tx.folder.delete({
+        where: { 
+          id,
+          userId: user.id
+        }
+      })
+
+      // Update parent folder timestamps
+      if (folder.parentId) {
+        await updateParentFolderTimestamps(folder.parentId, user.id);
+      }
+
+      return folder;
+    });
 
     revalidatePath('/library')
-    if (folder.parentId) revalidatePath(`/folder/${folder.parentId}`)
+    if (result.parentId) revalidatePath(`/folder/${result.parentId}`)
     return { success: true }
   } catch (error) {
-    return { success: false, error: 'Failed to delete folder' }
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to delete folder' }
   }
 }
 
@@ -178,18 +250,29 @@ export async function renameFolder(id: string, newName: string) {
   }
 
   try {
-    const folder = await db.folder.update({
-      where: { 
-        id,
-        userId: user.id
-      },
-      data: { name: newName }
-    })
+    // Use a transaction to ensure data consistency
+    const result = await db.$transaction(async (tx) => {
+      const folder = await tx.folder.update({
+        where: { 
+          id,
+          userId: user.id
+        },
+        data: { name: newName }
+      });
+
+      // Update parent folder timestamps
+      if (folder.parentId) {
+        await updateParentFolderTimestamps(folder.parentId, user.id);
+      }
+
+      return folder;
+    });
 
     revalidatePath('/library')
-    if (folder.parentId) revalidatePath(`/folder/${folder.parentId}`)
+    if (result.parentId) revalidatePath(`/folder/${result.parentId}`)
     return { success: true }
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Failed to rename folder:', error);
     return { success: false, error: 'Failed to rename folder' }
   }
 } 

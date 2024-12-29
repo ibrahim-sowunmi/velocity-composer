@@ -36,7 +36,8 @@ export function CopyButton({ getContent }: CopyButtonProps) {
             'text/plain': plainTextBlob
           })
           await navigator.clipboard.write([clipboardItem])
-        } catch (err) {
+        } catch (clipboardErr) {
+          console.error('Failed to use clipboard API:', clipboardErr)
           // If modern approach fails, try the selection approach
           const tempDiv = document.createElement('div')
           tempDiv.innerHTML = content
@@ -55,7 +56,8 @@ export function CopyButton({ getContent }: CopyButtonProps) {
             
             try {
               document.execCommand('copy')
-            } catch (execErr) {
+            } catch (execError) {
+              console.error('Failed to execute copy command:', execError)
               throw new Error('Copy failed')
             } finally {
               selection.removeAllRanges()
@@ -82,7 +84,8 @@ export function CopyButton({ getContent }: CopyButtonProps) {
           
           try {
             document.execCommand('copy')
-          } catch (err) {
+          } catch (fallbackError) {
+            console.error('Failed to copy with fallback:', fallbackError)
             throw new Error('Copy failed')
           } finally {
             selection.removeAllRanges()
@@ -94,9 +97,9 @@ export function CopyButton({ getContent }: CopyButtonProps) {
       setCopied(true)
       setError(null)
       setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      setError('Failed to copy')
-      setTimeout(() => setError(null), 2000)
+    } catch (copyError) {
+      console.error('Failed to copy to clipboard:', copyError)
+      setError('Failed to copy to clipboard')
     }
   }
 
