@@ -109,6 +109,10 @@ model File {
   // Relation to user who owns this file
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // is the filed public
+  isPublic    Boolean   @default(false)
+  // Reference to original file if this is a fork
+  originalFileId String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -4,6 +4,7 @@ import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { puckConfig } from "@/app/config/puck"
+import { Prisma } from "@prisma/client"
 
 export async function getFileData(id: string) {
   const session = await auth()
@@ -220,5 +221,146 @@ export async function renameFile(id: string, newName: string) {
     return { success: true }
   } catch (error) {
     return { success: false, error: 'Failed to rename file' }
+  }
+}
+
+export async function toggleFileVisibility(id: string) {
+  const session = await auth()
+  if (!session || !session.user) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  const user = await db.user.findUnique({
+    where: {
+      email: session.user.email as string,
+    },
+    select: {
+      id: true
+    }
+  })
+
+  if (!user) {
+    return { success: false, error: 'User not found' }
+  }
+
+  try {
+    const file = await db.file.findUnique({
+      where: { 
+        id,
+        userId: user.id
+      },
+      select: {
+        isPublic: true
+      }
+    })
+
+    if (!file) {
+      return { success: false, error: 'File not found' }
+    }
+
+    const updatedFile = await db.file.update({
+      where: { 
+        id,
+        userId: user.id
+      },
+      data: { 
+        isPublic: !file.isPublic 
+      }
+    })
+
+    revalidatePath('/library')
+    if (updatedFile.folderId) revalidatePath(`/folder/${updatedFile.folderId}`)
+    return { success: true, isPublic: updatedFile.isPublic }
+  } catch (error) {
+    return { success: false, error: 'Failed to toggle file visibility' }
+  }
+}
+
+export async function searchPublicFiles(query: string) {
+  const session = await auth()
+  if (!session || !session.user) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    const files = await db.file.findMany({
+      where: {
+        isPublic: true,
+        name: {
+          contains: query,
+          mode: 'insensitive'
+        }
+      },
+      include: {
+        user: {
+          select: {
+            email: true
+          }
+        }
+      },
+      orderBy: {
+        updatedAt: 'desc'
+      },
+      take: 10
+    })
+
+    return { 
+      success: true, 
+      files: files.map(file => ({
+        ...file,
+        creatorEmail: file.user.email
+      }))
+    }
+  } catch (error) {
+    return { success: false, error: 'Failed to search files' }
+  }
+}
+
+export async function forkFile(fileId: string) {
+  const session = await auth()
+  if (!session || !session.user) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  const user = await db.user.findUnique({
+    where: {
+      email: session.user.email as string,
+    },
+    select: {
+      id: true
+    }
+  })
+
+  if (!user) {
+    return { success: false, error: 'User not found' }
+  }
+
+  try {
+    const originalFile = await db.file.findUnique({
+      where: { 
+        id: fileId,
+        isPublic: true
+      }
+    })
+
+    if (!originalFile) {
+      return { success: false, error: 'File not found or not public' }
+    }
+
+    const forkedFile = await db.file.create({
+      data: {
+        name: `${originalFile.name} (forked)`,
+        userId: user.id,
+        puckData: originalFile.puckData as Prisma.InputJsonValue,
+        productList: originalFile.productList,
+        isPublic: false,
+        originalFileId: fileId
+      }
+    })
+
+    revalidatePath('/library')
+    return { success: true, file: forkedFile }
+  } catch (error) {
+    return { success: false, error: 'Failed to fork file' }
   }
 } 

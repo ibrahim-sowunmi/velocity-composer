@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { ContentView } from "@/app/components/content/ContentView"
+import { FileSearch } from "@/app/components/search/FileSearch"
 
 export default async function Library() {
   const session = await auth()
@@ -48,11 +49,14 @@ export default async function Library() {
   ])
 
   return (
-    <ContentView
-      viewType="library"
-      initialFiles={files}
-      initialFolders={folders}
-      userName={session.user.name || ''}
-    />
+    <div className="space-y-6">
+      <FileSearch />
+      <ContentView
+        viewType="library"
+        initialFiles={files}
+        initialFolders={folders}
+        userName={session.user.name || ''}
+      />
+    </div>
   )
 }
