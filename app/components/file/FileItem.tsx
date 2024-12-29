@@ -58,12 +58,16 @@ export function FileItem({ file, onDelete, onRename, onCopy }: FileItemProps) {
     setError(null)
   }
 
-  const handleDelete = async () => {
-    const result = await onDelete(file.id)
-    if (!result.success) {
-      setError(result.error || 'Failed to delete')
+  const handleDelete = async (e?: React.MouseEvent | React.KeyboardEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
     }
-    setShowDeleteConfirm(false)
+    const result = await onDelete(file.id);
+    if (!result.success) {
+      setError(result.error || 'Failed to delete');
+    }
+    setShowDeleteConfirm(false);
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -222,8 +226,22 @@ export function FileItem({ file, onDelete, onRename, onCopy }: FileItemProps) {
         )}
       </div>
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-stripe-text/10 flex items-center justify-center backdrop-blur-sm z-50">
-          <div className="bg-white p-6 rounded-lg w-[28rem] shadow-stripe relative">
+        <div 
+          className="fixed inset-0 bg-stripe-text/10 flex items-center justify-center backdrop-blur-sm z-50"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowDeleteConfirm(false);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              setShowDeleteConfirm(false);
+            }
+          }}
+        >
+          <div 
+            className="bg-white p-6 rounded-lg w-[28rem] shadow-stripe relative"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h2 className="text-xl font-semibold text-stripe-text mb-4">Delete File</h2>
             <p className="text-sm text-stripe-muted mb-6">
               Are you sure you want to delete &quot;{file.name}&quot;? This action cannot be undone.
@@ -239,7 +257,7 @@ export function FileItem({ file, onDelete, onRename, onCopy }: FileItemProps) {
                 onClick={handleDelete}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    handleDelete()
+                    handleDelete(e);
                   }
                 }}
                 className="px-4 py-2 bg-stripe-danger text-white text-sm font-medium rounded-md hover:bg-stripe-danger-dark shadow-stripe-sm hover:shadow-stripe transition-all"
