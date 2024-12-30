@@ -14,19 +14,21 @@ const NavigationButtons = ({ file }) => {
     <div className="flex items-center gap-4">
       <Link
         href={file.folderId ? `/folder/${file.folderId}` : '/library'}
-        className="group flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+        className="group flex items-center text-sm font-medium text-gray-600 hover:text-stripe-primary transition-colors"
       >
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          viewBox="0 0 20 20" 
-          fill="currentColor" 
-          className="w-4 h-4 transition-transform group-hover:-translate-x-0.5"
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="transition-transform group-hover:-translate-x-2 group-hover:text-stripe-primary"
         >
-          <path 
-            fillRule="evenodd" 
-            d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" 
-            clipRule="evenodd" 
-          />
+          <path d="m15 18-6-6 6-6" />
         </svg>
         Back to Library
       </Link>

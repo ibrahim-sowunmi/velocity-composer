@@ -1,0 +1,363 @@
+/* Sidebar Background */
+[class*="_PuckLayout-leftSideBar_"] {
+  background: white !important;
+  border-right: 1px solid #e6e6e6 !important;
+}
+
+/* Section Headers */
+[class*="_SidebarSection-title_"] {
+  background: white !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+  padding: 12px 16px !important;
+}
+
+[class*="_SidebarSection-breadcrumbs_"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+[class*="_SidebarSection-breadcrumb_"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+[class*="_SidebarSection-breadcrumbLabel_"] {
+  color: #525f7f !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+}
+
+[class*="_SidebarSection-breadcrumbLabel_"]:hover {
+  color: #635bff !important;
+}
+
+[class*="_SidebarSection-heading_"] h2 {
+  color: #1a1f36 !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+}
+
+/* Component List Titles */
+[class*="_ComponentList-title_"] {
+  color: #525f7f !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.025em !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  transition: all 150ms ease !important;
+}
+
+[class*="_ComponentList-title_"]:hover {
+  background: #f6f9fc !important;
+  color: #635bff !important;
+}
+
+/* Drawer Items */
+[class*="_DrawerItem_"] {
+  margin: 4px 0 !important;
+}
+
+[class*="_DrawerItem-draggable_"] {
+  background: white !important;
+  border: 1px solid #e6e6e6 !important;
+  border-radius: 6px !important;
+  padding: 10px 12px !important;
+  transition: all 150ms ease !important;
+}
+
+[class*="_DrawerItem-draggable_"]:hover {
+  border-color: #635bff !important;
+  background: #f6f9fc !important;
+  box-shadow: 0 2px 5px rgba(50, 50, 93, 0.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Layer Tree Items */
+[class*="_Layer-clickable_"] {
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  transition: all 150ms ease !important;
+}
+
+[class*="_Layer-clickable_"]:hover {
+  background: #f6f9fc !important;
+  color: #635bff !important;
+}
+
+/* Icons */
+[class*="_Layer-icon_"],
+[class*="_ComponentList-titleIcon_"] {
+  color: #8898aa !important;
+}
+
+/* Section Content */
+[class*="_SidebarSection-content_"] {
+  padding: 12px !important;
+}
+
+/* Hover States for Interactive Elements */
+[class*="_Layer-inner_"]:hover [class*="_Layer-icon_"],
+[class*="_ComponentList-title_"]:hover [class*="_ComponentList-titleIcon_"] {
+  color: #635bff !important;
+}
+
+/* Header Styles */
+[class*="_PuckLayout-header_"] {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e6e6e6 !important;
+  height: 64px !important;
+}
+
+[class*="_PuckLayout-headerTitle_"] {
+  flex: 1 !important;
+}
+
+[class*="_PuckLayout-headerTitle_"] h2 {
+  color: #1a1f36 !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
+
+[class*="_PuckLayout-headerTools_"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+/* Menu Bar Styles */
+[class*="_MenuBar_"] {
+  display: flex !important;
+  align-items: center !important;
+}
+
+[class*="_MenuBar-inner_"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+}
+
+[class*="_MenuBar-history_"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding-right: 16px !important;
+  border-right: 1px solid #e6e6e6 !important;
+}
+
+/* Action Buttons */
+[class*="_IconButton_"] {
+  color: #525f7f !important;
+  transition: all 150ms ease !important;
+  background: transparent !important;
+}
+
+[class*="_IconButton_"]:hover {
+  background: #f6f9fc !important;
+  color: #635bff !important;
+}
+
+[class*="_IconButton--disabled_"] {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+[class*="_IconButton--disabled_"]:hover {
+  background: transparent !important;
+  color: #525f7f !important;
+}
+
+/* View Page & Publish Buttons */
+a[href^="/view/"], 
+button:not([class*="_IconButton_"]) {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
+  transition: all 150ms ease !important;
+}
+
+/* Input Styles */
+[class*="_Input-input_"] {
+  border: 1px solid #e6e6e6 !important;
+  border-radius: 6px !important;
+  padding: 10px 12px !important;
+  font-size: 14px !important;
+  transition: all 150ms ease !important;
+}
+
+[class*="_Input-input_"]:focus {
+  border-color: #635bff !important;
+  box-shadow: 0 0 0 1px #635bff !important;
+  outline: none !important;
+}
+
+/* Input Labels */
+[class*="_Input-label_"] {
+  color: #525f7f !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  margin-bottom: 6px !important;
+}
+
+[class*="_Input-labelIcon_"] {
+  color: #8898aa !important;
+}
+
+/* Array Field Styles */
+[class*="_ArrayField_"] {
+  background: transparent !important;
+}
+
+[class*="_ArrayFieldItem_"] {
+  box-shadow: 0 2px 5px rgba(255, 255, 255, 0.1) !important;
+  background: white !important;
+  border: 1px solid #e6e6e6 !important;
+  border-radius: 6px !important;
+  margin: 0 !important;
+  transition: all 150ms ease !important;
+}
+
+[class*="_ArrayFieldItem_"]:hover {
+  box-shadow: 0 2px 5px rgba(255, 255, 255, 0.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+[class*="_ArrayFieldItem-summary_"] {
+  background: white !important;
+  padding: 12px !important;
+  border-bottom: 1px solid #e6e6e6 !important;
+}
+
+[class*="_ArrayFieldItem-body_"] {
+  background: white !important;
+  padding: 12px !important;
+}
+
+[class*="_ArrayFieldItem-fieldset_"] {
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Add Button Style */
+[class*="_ArrayField-addButton_"] {
+  background: white !important;
+  border: 1px dashed #e6e6e6 !important;
+  border-radius: 6px !important;
+  color: #635bff !important;
+  padding: 8px !important;
+  transition: all 150ms ease !important;
+  width: 100% !important;
+}
+
+[class*="_ArrayField-addButton_"]:hover {
+  background: #f6f9fc !important;
+  border-color: #635bff !important;
+}
+
+/* Icon Button Styles */
+[class*="_IconButton_"] {
+  color: #8898aa !important;
+  transition: all 150ms ease !important;
+}
+
+[class*="_IconButton_"]:hover {
+  color: #635bff !important;
+  background: #f6f9fc !important;
+}
+
+/* Drag Icon */
+[class*="_DragIcon_"] {
+  color: #8898aa !important;
+  cursor: grab !important;
+}
+
+[class*="_DragIcon_"]:hover {
+  color: #635bff !important;
+}
+
+/* Action Bar */
+[class*="_ActionBar_"] {
+  background: #635bff !important;
+  border: none !important;
+  border-radius: 6px !important;
+}
+
+[class*="_ActionBar-actionsLabel_"] {
+  color: white !important;
+}
+
+
+[class*="_ActionBar-action_"]:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+
+
+/* Dragging States */
+[class*="_PuckCanvas--isDragging_"] [class*="_PuckDragOverlay_"] {
+  background: rgba(99, 91, 255, 0.05) !important; /* Very light purple */
+}
+
+[class*="_PuckCanvas--isDragging_"] [class*="_PuckDragOverlay--isOver_"] {
+  background: rgba(99, 91, 255, 0.1) !important; /* Light purple */
+}
+
+[class*="_PuckCanvas--isDragging_"] [class*="_PuckDragOverlay--isActive_"] {
+  background: rgba(99, 91, 255, 0.15) !important; /* Slightly darker purple */
+  border: 2px solid #635bff !important;
+}
+
+/* Draggable Component */
+
+[class*="_DraggableComponent-overlay_"] {
+  border: 4px solid #e6e6e6 !important;
+  border-radius: 6px !important;
+  
+}
+
+/* Hover state */
+[class*="_DraggableComponent_"]:hover [class*="_DraggableComponent-overlay_"] {
+  border-color: #635bff !important;
+}
+
+/* Active dragging state */
+[class*="_DraggableComponent_"]:active [class*="_DraggableComponent-overlay_"] {
+  border-color: #635bff !important;
+  box-shadow: 0 1px 3px rgba(50, 50, 93, 0.15) !important;
+}
+
+
+/* Base empty drop zone */
+[class*="_DropZone_"]:not([class*="_DropZone--hasChildren_"]) {
+  background: rgba(99, 91, 255, 0.05) !important;
+  outline: 1px dashed rgba(99, 91, 255, 0.4) !important;
+  border-radius: 6px !important;
+}
+
+/* When dragging over an area */
+[class*="_DropZone_"][class*="_DropZone--isAreaSelected_"],
+[class*="_DropZone_"][class*="_DropZone--draggingOverArea_"]:not(:has([class*="_DropZone--hoveringOverArea_"])),
+[class*="_DropZone_"][class*="_DropZone--hoveringOverArea_"]:not([class*="_DropZone--isDisabled_"]):not([class*="_DropZone--isRootZone_"]):not([class*="_DropZone--hasChildren_"]) {
+  background: rgba(99, 91, 255, 0.1) !important;
+  outline: 1px dashed rgba(99, 91, 255, 0.6) !important;
+}
+
+/* Active drop destination */
+[class*="_DropZone_"][class*="_DropZone--isDestination_"] {
+  outline: 1px dashed #635bff !important;
+  box-shadow: 0 2px 5px rgba(50, 50, 93, 0.1) !important;
+}
+
+[class*="_DropZone_"][class*="_DropZone--isDestination_"]:not([class*="_DropZone--isRootZone_"]) {
+  background: rgba(99, 91, 255, 0.15) !important;
+}
+

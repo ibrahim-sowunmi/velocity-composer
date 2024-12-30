@@ -1,21 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { Copy, Check, PenTool, ChevronLeft } from 'lucide-react'
-import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { Copy, Check } from 'lucide-react'
 
-interface CopyButtonProps {
+interface CopyContentButtonProps {
+  buttonBaseStyles: string
   getContent: () => string | Promise<string>
 }
 
-export function CopyButton({ getContent }: CopyButtonProps) {
+export function CopyContentButton({ buttonBaseStyles, getContent }: CopyContentButtonProps) {
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const params = useParams()
-  const fileId = params?.id as string
-
-  const buttonBaseStyles = "p-4 rounded-full shadow-lg transition-all duration-300 z-50 flex items-center gap-2 text-base font-medium w-[180px] justify-center relative"
 
   const handleCopy = async () => {
     try {
@@ -104,41 +99,29 @@ export function CopyButton({ getContent }: CopyButtonProps) {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 flex items-center gap-3">
-      <Link
-        href="/library"
-        className={`${buttonBaseStyles} group bg-gray-100 text-gray-900 hover:bg-gray-200`}
-      >
-        <ChevronLeft className="absolute left-4 h-5 w-5 transform transition-all duration-300 opacity-0 -translate-x-4 group-hover:translate-x-0 group-hover:opacity-100" />
-        <span className="transform transition-all duration-300 group-hover:translate-x-2">Back to Library</span>
-      </Link>
-      <Link
-        href={`/editor/${fileId}`}
-        className={`${buttonBaseStyles} group bg-gray-100 text-gray-900 hover:bg-gray-200`}
-      >
-        <PenTool className="absolute left-4 h-6 w-6 transform transition-all duration-300 opacity-0 -translate-x-4 group-hover:translate-x-0 group-hover:opacity-100" />
-        <span className="transform transition-all duration-300 group-hover:translate-x-2">Edit Content</span>
-      </Link>
+    <>
       <button
         onClick={handleCopy}
-        className={`${buttonBaseStyles} ${
+        className={`${buttonBaseStyles} group ${
           error 
-            ? 'bg-stripe-danger text-white hover:bg-stripe-danger-dark'
-            : 'bg-stripe-primary text-white hover:bg-stripe-primary-dark'
+            ? 'bg-red-50 hover:bg-red-100 text-red-700 border border-red-200'
+            : copied
+            ? 'bg-[#0A2540] hover:bg-[#0A2540]/90 text-white border border-[#0A2540]'
+            : 'bg-[#635BFF] hover:bg-[#635BFF]/90 text-white border border-[#635BFF]'
         }`}
         title={error || "Copy to clipboard"}
       >
         {error ? (
-          <span className="transition-all duration-300 ease-in-out">Copy failed</span>
+          <span className="transform transition-all duration-300">Copy failed</span>
         ) : copied ? (
-          <div className="flex items-center gap-2 transition-all duration-300 ease-in-out transform scale-110">
-            <Check className="h-6 w-6" />
+          <div className="flex items-center gap-2 transform transition-all duration-300 scale-105">
+            <Check className="h-5 w-5 text-white" />
             <span>Copied</span>
           </div>
         ) : (
-          <div className="flex items-center gap-2 group">
-            <Copy className="h-6 w-6 transform transition-all duration-300 ease-in-out hover:scale-110 group-hover:[animation:smoothBounce_1s_ease-in-out_infinite]" />
-            <span>Copy Content</span>
+          <div className="flex items-center gap-2">
+            <Copy className="absolute left-4 h-5 w-5 transform transition-all duration-300 opacity-0 -translate-x-4 group-hover:translate-x-0 group-hover:opacity-100 text-white" />
+            <span className="transform transition-all duration-300 group-hover:translate-x-2">Copy Content</span>
           </div>
         )}
       </button>
@@ -152,6 +135,6 @@ export function CopyButton({ getContent }: CopyButtonProps) {
           }
         }
       `}</style>
-    </div>
+    </>
   )
-}
+} 

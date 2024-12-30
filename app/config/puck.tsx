@@ -63,7 +63,7 @@ export const puckConfig = {
       defaultExpanded: false,
     },
     treasury: {
-      title: "TREASURY (Banking-as-a-Service)",
+      title: "TREASURY (BaaS)",
       components: [],
       defaultExpanded: false,
     },

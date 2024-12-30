@@ -6,7 +6,7 @@ import { useEffect, useState, useRef, useCallback } from "react"
 import { getFileData } from "@/app/actions/file"
 import { use } from "react"
 import { puckConfig } from "@/app/config/puck"
-import { CopyButton } from "@/app/components/view/CopyButton"
+import { ViewButtonMenu } from "@/app/components/view/ViewButtonMenu"
 
 export default function ViewPage({ params }) {
   const unwrappedParams = use(params)
@@ -90,7 +90,7 @@ export default function ViewPage({ params }) {
       <div className="relative" ref={contentRef}>
         <Render config={puckConfig} data={data} />
       </div>
-      <CopyButton getContent={getTextContent} />
+      <ViewButtonMenu getContent={getTextContent} />
     </>
   )
 }
