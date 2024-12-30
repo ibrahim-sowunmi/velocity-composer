@@ -111,23 +111,41 @@ export function FileItem({ file, onDelete, onRename, onCopy }: FileItemProps) {
   }
 
   return (
-    <div 
+    <div
       className="group relative hover:bg-stripe-light transition-colors duration-200 cursor-pointer"
       onClick={handleClick}
     >
       <div className="grid grid-cols-[minmax(400px,2fr)_200px_200px_180px] gap-6 items-center px-6 py-4">
         {isEditing ? (
-          <div onClick={e => e.stopPropagation()}>
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onBlur={handleRename}
-              onKeyDown={handleKeyDown}
-              className="w-full px-3 py-1.5 text-sm border border-stripe-border rounded-lg shadow-stripe-sm focus:border-stripe-primary focus:ring-1 focus:ring-stripe-primary outline-none"
-              autoFocus
-            />
-            {error && <span className="text-xs text-stripe-danger mt-1">{error}</span>}
+          <div className="flex items-center gap-4 min-w-0" onClick={e => e.stopPropagation()}>
+            <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-stripe-border-light group-hover:bg-stripe-primary/10 transition-colors">
+              <FileIcon className="h-4 w-4 text-stripe-muted group-hover:text-stripe-primary transition-colors" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-3">
+                <div className="relative w-full">
+                  {/* Create an invisible placeholder that maintains the exact text dimensions */}
+                  <div className="invisible h-[22px]" aria-hidden="true">
+                    {newName}
+                  </div>
+                  {/* Position input absolutely over the placeholder */}
+                  <input
+                    type="text"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    onBlur={handleRename}
+                    onKeyDown={handleKeyDown}
+                    className="absolute inset-0 w-full text-[15px] text-stripe-text font-medium border-0 focus:ring-0 outline-none bg-white"
+                    autoFocus
+                  />
+                  {/* Decorative border */}
+                  <div className="absolute -inset-1.5 border border-stripe-primary rounded-lg shadow-stripe-sm pointer-events-none ring-1 ring-stripe-primary" />
+                </div>
+              </div>
+              <div className="h-6 mt-1 flex gap-1.5 items-center overflow-hidden">
+                {error && <span className="text-xs text-stripe-danger">{error}</span>}
+              </div>
+            </div>
           </div>
         ) : (
           <>
@@ -137,7 +155,7 @@ export function FileItem({ file, onDelete, onRename, onCopy }: FileItemProps) {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-3">
-                  <span 
+                  <span
                     className="text-[15px] text-stripe-text font-medium truncate group-hover:text-stripe-primary transition-colors"
                     title={file.name}
                   >
@@ -226,7 +244,7 @@ export function FileItem({ file, onDelete, onRename, onCopy }: FileItemProps) {
         )}
       </div>
       {showDeleteConfirm && (
-        <div 
+        <div
           className="fixed inset-0 bg-stripe-text/10 flex items-center justify-center backdrop-blur-sm z-50"
           onClick={(e) => {
             e.stopPropagation();
@@ -238,7 +256,7 @@ export function FileItem({ file, onDelete, onRename, onCopy }: FileItemProps) {
             }
           }}
         >
-          <div 
+          <div
             className="bg-white p-6 rounded-lg w-[28rem] shadow-stripe relative"
             onClick={(e) => e.stopPropagation()}
           >

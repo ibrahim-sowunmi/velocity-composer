@@ -50,7 +50,7 @@ export default async function Home() {
           {/* Subheader with value proposition */}
           <div className="space-y-6 max-w-3xl mx-auto">
             <p className="text-2xl text-gray-600 leading-relaxed">
-              Empower solution architects to craft perfect customer communications in minutes, not hours.
+              Empowering you to craft perfect customer communications in minutes, not hours.
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left mt-12">
