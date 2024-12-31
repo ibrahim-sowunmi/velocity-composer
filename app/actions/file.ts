@@ -376,7 +376,7 @@ export async function searchPublicFiles(query: string) {
   }
 }
 
-export async function forkFile(fileId: string) {
+export async function forkFile(fileId: string, currentFolderId?: string) {
   const session = await auth()
   if (!session || !session.user) {
     return { success: false, error: 'Unauthorized' }
@@ -411,6 +411,7 @@ export async function forkFile(fileId: string) {
       data: {
         name: `${originalFile.name} (forked)`,
         userId: user.id,
+        folderId: currentFolderId || null,
         puckData: originalFile.puckData as Prisma.InputJsonValue,
         productList: originalFile.productList,
         isPublic: false,
@@ -419,6 +420,7 @@ export async function forkFile(fileId: string) {
     })
 
     revalidatePath('/library')
+    if (currentFolderId) revalidatePath(`/folder/${currentFolderId}`)
     return { success: true, file: forkedFile }
   } catch (error) {
     console.error('Failed to fork file:', error);
@@ -426,7 +428,7 @@ export async function forkFile(fileId: string) {
   }
 }
 
-export async function copyFile(id: string) {
+export async function copyFile(id: string, currentFolderId?: string) {
   const session = await auth()
   if (!session || !session.user) {
     return { success: false, error: 'Unauthorized' }
@@ -487,7 +489,7 @@ export async function copyFile(id: string) {
     const copiedFile = await db.file.create({
       data: {
         name: newName,
-        folderId: originalFile.folderId,
+        folderId: currentFolderId || originalFile.folderId,
         userId: user.id,
         puckData: originalFile.puckData as Prisma.InputJsonValue,
         productList: originalFile.productList,

@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { ContentView } from "@/app/components/content/ContentView"
+import { FileSearch } from "@/app/components/search/FileSearch"
 import { signOut } from "@/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
@@ -80,11 +81,14 @@ export default async function FolderPage({ params }: any) {
   ])
 
   return (
-    <ContentView
-      viewType="folder"
-      folder={folder}
-      initialFiles={files}
-      initialFolders={folders}
-    />
+    <div className="space-y-6">
+      <FileSearch currentFolderId={id} />
+      <ContentView
+        viewType="folder"
+        folder={folder}
+        initialFiles={files}
+        initialFolders={folders}
+      />
+    </div>
   )
 } 

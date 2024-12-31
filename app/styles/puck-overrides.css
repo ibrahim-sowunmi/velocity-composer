@@ -34,7 +34,7 @@
 
 /* Drawer Items */
 [class*="_DrawerItem_"] {
-  margin: 4px 0 !important;
+  margin: 0px 0 !important;
 }
 
 [class*="_DrawerItem-draggable_"] {
@@ -50,6 +50,10 @@
   background: #f6f9fc !important;
   box-shadow: 0 2px 5px rgba(50, 50, 93, 0.1) !important;
   transform: translateY(-1px) !important;
+}
+
+[class*="_DrawerItem-draggable_"]:hover [class*="_DrawerItem-name_"] {
+  color: #635bff !important;
 }
 
 /* Layer Tree Items */

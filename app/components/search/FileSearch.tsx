@@ -24,7 +24,11 @@ interface ForkResponse {
   error?: string
 }
 
-export function FileSearch() {
+interface FileSearchProps {
+  currentFolderId?: string
+}
+
+export function FileSearch({ currentFolderId }: FileSearchProps) {
   const [query, setQuery] = useState('')
   const [debouncedQuery] = useDebounce(query, 300)
   const [results, setResults] = useState<SearchResult[]>([])
@@ -74,7 +78,7 @@ export function FileSearch() {
 
   const handleFork = async (fileId: string) => {
     try {
-      const result = await forkFile(fileId) as ForkResponse
+      const result = await forkFile(fileId, currentFolderId) as ForkResponse
       if (result.success && result.file) {
         router.push(`/editor/${result.file.id}`)
       } else {

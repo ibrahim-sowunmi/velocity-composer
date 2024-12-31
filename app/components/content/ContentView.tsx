@@ -145,7 +145,7 @@ export function ContentView({
     if (viewType === 'library') {
       return (
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-stripe-text">
+          <h1 className="text-sm font-medium text-stripe-text">
             {(userName?.split(' ')[0] || 'My').charAt(0).toUpperCase() + (userName?.split(' ')[0] || 'My').slice(1)}&apos;s Library
           </h1>
           <div className="flex items-center gap-3">
@@ -161,7 +161,7 @@ export function ContentView({
     return (
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm">
-          <Link href="/library" className="text-stripe-muted hover:text-stripe-text transition-colors">
+          <Link href="/library" className="text-stripe-muted hover:text-stripe-primary">
             Library
           </Link>
           {folder.parent && (
@@ -169,7 +169,7 @@ export function ContentView({
               <ChevronRightIcon className="h-4 w-4 text-stripe-muted" />
               <Link
                 href={`/folder/${folder.parent.id}`}
-                className="text-stripe-muted hover:text-stripe-text transition-colors"
+                className="text-stripe-muted hover:text-stripe-primary"
               >
                 {folder.parent.name}
               </Link>
