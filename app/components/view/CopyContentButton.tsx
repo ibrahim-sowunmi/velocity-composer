@@ -121,7 +121,7 @@ export function CopyContentButton({ buttonBaseStyles, getContent }: CopyContentB
         ) : (
           <div className="flex items-center gap-2">
             <Copy className="absolute left-4 h-5 w-5 transform transition-all duration-300 opacity-0 -translate-x-4 group-hover:translate-x-0 group-hover:opacity-100 text-white" />
-            <span className="transform transition-all duration-300 group-hover:translate-x-2">Copy Content</span>
+            <span className="transform transition-all duration-300 group-hover:translate-x-2">Copy Email</span>
           </div>
         )}
       </button>

@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation'
 import { BackToLibraryButton } from './BackToLibraryButton'
 import { EditContentButton } from './EditContentButton'
 import { CopyContentButton } from './CopyContentButton'
+import { ForkContentButton } from './ForkContentButton'
 
 interface ViewButtonMenuProps {
   getContent: () => string | Promise<string>
@@ -20,6 +21,7 @@ export function ViewButtonMenu({ getContent, canEdit }: ViewButtonMenuProps) {
     <div className="fixed bottom-6 right-6 flex items-center gap-3">
       <BackToLibraryButton buttonBaseStyles={buttonBaseStyles} />
       {canEdit && <EditContentButton buttonBaseStyles={buttonBaseStyles} fileId={fileId} />}
+      {!canEdit && <ForkContentButton buttonBaseStyles={buttonBaseStyles} fileId={fileId} />}
       <CopyContentButton buttonBaseStyles={buttonBaseStyles} getContent={getContent} />
     </div>
   )
