@@ -46,34 +46,33 @@ export function ContentView({
   const [files, setFiles] = useState(initialFiles)
   const [folders, setFolders] = useState(initialFolders)
 
+  const sortItems = <T extends { name: string, createdAt: Date, updatedAt: Date }>(items: T[]) => {
+    return [...items].sort((a, b) => {
+      if (sortField === 'name') {
+        return sortDirection === 'asc' 
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name)
+      }
+      const aDate = new Date(a[sortField])
+      const bDate = new Date(b[sortField])
+      return sortDirection === 'asc' 
+        ? aDate.getTime() - bDate.getTime()
+        : bDate.getTime() - aDate.getTime()
+    })
+  }
+
   const handleSort = (field: SortField) => {
     const newDirection = field === sortField && sortDirection === 'asc' ? 'desc' : 'asc'
     setSortField(field)
     setSortDirection(newDirection)
-
-    const sortItems = <T extends { name: string, createdAt: Date, updatedAt: Date }>(items: T[]) => {
-      return [...items].sort((a, b) => {
-        if (field === 'name') {
-          return newDirection === 'asc' 
-            ? a.name.localeCompare(b.name)
-            : b.name.localeCompare(a.name)
-        }
-        const aDate = new Date(a[field])
-        const bDate = new Date(b[field])
-        return newDirection === 'asc' 
-          ? aDate.getTime() - bDate.getTime()
-          : bDate.getTime() - aDate.getTime()
-      })
-    }
-
-    setFolders(sortItems(folders))
-    setFiles(sortItems(files))
+    setFolders(prevFolders => sortItems(prevFolders))
+    setFiles(prevFiles => sortItems(prevFiles))
   }
 
   const handleCreateFile = async (formData: FormData) => {
     const result = await createFile(formData)
     if (result.success && result.file) {
-      setFiles(prevFiles => [...prevFiles, result.file])
+      setFiles(prevFiles => sortItems([...prevFiles, result.file]))
     }
     return result
   }
@@ -81,7 +80,7 @@ export function ContentView({
   const handleCreateFolder = async (formData: FormData) => {
     const result = await createFolder(formData)
     if (result.success && result.folder) {
-      setFolders(prevFolders => [...prevFolders, result.folder])
+      setFolders(prevFolders => sortItems([...prevFolders, result.folder]))
     }
     return result
   }
@@ -90,8 +89,6 @@ export function ContentView({
     const result = await deleteFile(id)
     if (result.success) {
       setFiles(prevFiles => prevFiles.filter(file => file.id !== id))
-      setSortField('updatedAt')
-      setSortDirection('desc')
     }
     return result
   }
@@ -100,8 +97,6 @@ export function ContentView({
     const result = await deleteFolder(id)
     if (result.success) {
       setFolders(prevFolders => prevFolders.filter(folder => folder.id !== id))
-      setSortField('updatedAt')
-      setSortDirection('desc')
     }
     return result
   }
@@ -109,11 +104,12 @@ export function ContentView({
   const handleRenameFile = async (id: string, newName: string) => {
     const result = await renameFile(id, newName)
     if (result.success) {
-      setFiles(prevFiles => prevFiles.map(file => 
-        file.id === id ? { ...file, name: newName } : file
-      ))
-      setSortField('updatedAt')
-      setSortDirection('desc')
+      setFiles(prevFiles => {
+        const updatedFiles = prevFiles.map(file => 
+          file.id === id ? { ...file, name: newName } : file
+        )
+        return sortItems(updatedFiles)
+      })
     }
     return result
   }
@@ -121,24 +117,18 @@ export function ContentView({
   const handleRenameFolder = async (id: string, newName: string) => {
     const result = await renameFolder(id, newName)
     if (result.success) {
-      setFolders(prevFolders => prevFolders.map(folder => 
-        folder.id === id ? { ...folder, name: newName } : folder
-      ))
-      setSortField('updatedAt')
-      setSortDirection('desc')
+      setFolders(prevFolders => {
+        const updatedFolders = prevFolders.map(folder => 
+          folder.id === id ? { ...folder, name: newName } : folder
+        )
+        return sortItems(updatedFolders)
+      })
     }
     return result
   }
 
   const handleCopyUpdate = (newFiles: any[]) => {
-    const sortedFiles = [...newFiles].sort((a, b) => {
-      const aDate = new Date(a.updatedAt)
-      const bDate = new Date(b.updatedAt)
-      return bDate.getTime() - aDate.getTime() // desc order
-    })
-    setFiles(sortedFiles)
-    setSortField('updatedAt')
-    setSortDirection('desc')
+    setFiles(sortItems(newFiles))
   }
 
   const renderHeader = () => {

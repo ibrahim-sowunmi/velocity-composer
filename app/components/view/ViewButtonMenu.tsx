@@ -7,9 +7,10 @@ import { CopyContentButton } from './CopyContentButton'
 
 interface ViewButtonMenuProps {
   getContent: () => string | Promise<string>
+  canEdit?: boolean
 }
 
-export function ViewButtonMenu({ getContent }: ViewButtonMenuProps) {
+export function ViewButtonMenu({ getContent, canEdit }: ViewButtonMenuProps) {
   const params = useParams()
   const fileId = params?.id as string
 
@@ -18,7 +19,7 @@ export function ViewButtonMenu({ getContent }: ViewButtonMenuProps) {
   return (
     <div className="fixed bottom-6 right-6 flex items-center gap-3">
       <BackToLibraryButton buttonBaseStyles={buttonBaseStyles} />
-      <EditContentButton buttonBaseStyles={buttonBaseStyles} fileId={fileId} />
+      {canEdit && <EditContentButton buttonBaseStyles={buttonBaseStyles} fileId={fileId} />}
       <CopyContentButton buttonBaseStyles={buttonBaseStyles} getContent={getContent} />
     </div>
   )

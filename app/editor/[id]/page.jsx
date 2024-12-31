@@ -107,6 +107,10 @@ function Editor({ fileId }) {
         if (!result.success) {
           throw new Error(result.error || 'Failed to load file')
         }
+
+        if (!result.file.canEdit) {
+          throw new Error('You do not have permission to edit this file')
+        }
         
         // Ensure we have valid Puck data structure
         const puckData = result.file.puckData || { content: [], root: {} }
@@ -152,6 +156,12 @@ function Editor({ fileId }) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
         <div className="text-stripe-danger">{error}</div>
+        <Link
+          href="/library"
+          className="text-stripe-primary hover:text-stripe-primary-dark transition-colors"
+        >
+          Return to Library
+        </Link>
       </div>
     )
   }

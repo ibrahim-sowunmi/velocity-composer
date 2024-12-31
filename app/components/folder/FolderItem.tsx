@@ -78,62 +78,66 @@ export function FolderItem({ folder, onDelete, onRename }: FolderItemProps) {
       onClick={handleClick}
     >
       <div className="grid grid-cols-[minmax(400px,2fr)_200px_200px_180px] gap-6 items-center px-6 py-4">
-        {isEditing ? (
-          <div className="flex items-center gap-4 min-w-0" onClick={e => e.stopPropagation()}>
-            <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-stripe-border-light group-hover:bg-stripe-primary/10 transition-colors">
-              <FolderIcon className="h-4 w-4 text-stripe-muted group-hover:text-stripe-primary transition-colors" />
-            </div>
-            <div className="relative w-full">
-              <div className="invisible h-[22px]" aria-hidden="true">
-                {newName}
-              </div>
-              <input
-                type="text"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                onBlur={handleRename}
-                onKeyDown={handleKeyDown}
-                className="absolute inset-0 w-full text-[15px] text-stripe-text font-medium border-0 focus:ring-0 outline-none bg-white"
-                autoFocus
-              />
-              <div className="absolute -inset-1.5 border border-stripe-primary rounded-lg shadow-stripe-sm pointer-events-none ring-1 ring-stripe-primary" />
-            </div>
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-stripe-border-light group-hover:bg-stripe-primary/10 transition-colors">
+            <FolderIcon className="h-4 w-4 text-stripe-muted group-hover:text-stripe-primary transition-colors" />
           </div>
-        ) : (
-          <>
-            <div className="flex items-center gap-4 min-w-0">
-              <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-stripe-border-light group-hover:bg-stripe-primary/10 transition-colors">
-                <FolderIcon className="h-4 w-4 text-stripe-muted group-hover:text-stripe-primary transition-colors" />
+          <div className="min-w-0 flex-1">
+            {isEditing ? (
+              <div className="flex items-center gap-3" onClick={e => e.stopPropagation()}>
+                <div className="relative w-full">
+                  <div className="invisible h-[22px]" aria-hidden="true">
+                    {newName}
+                  </div>
+                  <input
+                    type="text"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    onBlur={handleRename}
+                    onKeyDown={handleKeyDown}
+                    className="absolute inset-0 w-full text-[15px] text-stripe-text font-medium border-0 focus:ring-0 focus:outline-none bg-white"
+                    autoFocus
+                  />
+                  <div className="absolute -inset-1.5 border border-stripe-primary rounded-lg shadow-stripe-sm pointer-events-none ring-1 ring-stripe-primary" />
+                </div>
               </div>
-              <span 
-                className="text-[15px] text-stripe-text truncate font-medium group-hover:text-stripe-primary transition-colors"
-                title={folder.name}
-              >
-                {folder.name}
-              </span>
-            </div>
-            <span className="text-sm text-stripe-muted whitespace-nowrap">
-              {formatDate(folder.createdAt)}
-            </span>
-            <span className="text-sm text-stripe-muted whitespace-nowrap">
-              {formatDate(folder.updatedAt)}
-            </span>
-            <div className="flex items-center gap-2 justify-end" onClick={e => e.stopPropagation()}>
-              <button
-                onClick={() => setIsEditing(true)}
-                className="p-2 text-stripe-muted hover:text-stripe-text rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
-              >
-                <PencilIcon className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setShowDeleteConfirm(true)}
-                className="p-2 text-stripe-danger hover:text-stripe-danger-dark rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
-              >
-                <Trash2Icon className="h-4 w-4" />
-              </button>
-            </div>
-          </>
-        )}
+            ) : (
+              <div className="flex items-center gap-3">
+                <span 
+                  className="text-[15px] text-stripe-text truncate font-medium group-hover:text-stripe-primary transition-colors"
+                  title={folder.name}
+                >
+                  {folder.name}
+                </span>
+              </div>
+            )}
+            {error && (
+              <div className="h-6 mt-1">
+                <span className="text-xs text-stripe-danger">{error}</span>
+              </div>
+            )}
+          </div>
+        </div>
+        <span className="text-sm text-stripe-muted whitespace-nowrap">
+          {formatDate(folder.createdAt)}
+        </span>
+        <span className="text-sm text-stripe-muted whitespace-nowrap">
+          {formatDate(folder.updatedAt)}
+        </span>
+        <div className="flex items-center gap-2 justify-end" onClick={e => e.stopPropagation()}>
+          <button
+            onClick={() => setIsEditing(true)}
+            className="p-2 text-stripe-muted hover:text-stripe-text rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
+          >
+            <PencilIcon className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="p-2 text-stripe-danger hover:text-stripe-danger-dark rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
+          >
+            <Trash2Icon className="h-4 w-4" />
+          </button>
+        </div>
       </div>
       {showDeleteConfirm && (
         <div 

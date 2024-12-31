@@ -134,7 +134,7 @@ export function FileSearch({ currentFolderId }: FileSearchProps) {
   }, []);
 
   return (
-    <div className="relative w-full" ref={containerRef}>
+    <div className="relative" ref={containerRef}>
       <div className="relative">
         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stripe-muted" />
         <input
@@ -169,13 +169,14 @@ export function FileSearch({ currentFolderId }: FileSearchProps) {
               {results.map((file, index) => (
                 <div
                   key={file.id}
-                  className={`p-4 hover:bg-stripe-light ${
+                  className={`group p-4 hover:bg-stripe-light cursor-pointer ${
                     index === selectedIndex ? 'bg-stripe-light' : ''
                   } ${index !== results.length - 1 ? 'border-b border-stripe-border' : ''}`}
+                  onClick={() => router.push(`/view/${file.id}`)}
                 >
                   <div className="flex items-center justify-between">
                     <div className="min-w-0 flex-1">
-                      <h4 className="text-sm font-medium text-stripe-text truncate">
+                      <h4 className="text-sm font-medium text-stripe-text truncate group-hover:text-stripe-primary transition-colors">
                         {file.name}
                       </h4>
                       <div className="mt-1 flex items-center gap-2 text-xs text-stripe-muted">
@@ -196,7 +197,7 @@ export function FileSearch({ currentFolderId }: FileSearchProps) {
                         ))}
                       </div>
                     </div>
-                    <div className="ml-4 flex items-center gap-2">
+                    <div className="ml-4 flex items-center gap-2" onClick={e => e.stopPropagation()}>
                       <button
                         onClick={() => handleFork(file.id)}
                         className="p-2 text-stripe-muted hover:text-stripe-text rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"

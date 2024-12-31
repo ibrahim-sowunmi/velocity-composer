@@ -13,6 +13,8 @@ export default function ViewPage({ params }) {
   const [data, setData] = useState({ content: [], root: {} })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [fileData, setFileData] = useState(null)
+  const [currentUserId, setCurrentUserId] = useState(null)
   const contentRef = useRef(null)
 
   const getTextContent = useCallback(() => {
@@ -50,6 +52,8 @@ export default function ViewPage({ params }) {
         
         if (mounted) {
           setData(puckData)
+          setFileData(result.file)
+          setCurrentUserId(result.currentUserId)
         }
       } catch (err) {
         if (mounted) {
@@ -85,12 +89,14 @@ export default function ViewPage({ params }) {
     )
   }
 
+  const isOwner = currentUserId && fileData?.userId === currentUserId
+
   return (
     <>
       <div className="relative" ref={contentRef}>
         <Render config={puckConfig} data={data} />
       </div>
-      <ViewButtonMenu getContent={getTextContent} />
+      <ViewButtonMenu getContent={getTextContent} canEdit={isOwner} />
     </>
   )
 }

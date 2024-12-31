@@ -116,13 +116,13 @@ export function FileItem({ file, onDelete, onRename, onCopy }: FileItemProps) {
       onClick={handleClick}
     >
       <div className="grid grid-cols-[minmax(400px,2fr)_200px_200px_180px] gap-6 items-center px-6 py-4">
-        {isEditing ? (
-          <div className="flex items-center gap-4 min-w-0" onClick={e => e.stopPropagation()}>
-            <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-stripe-border-light group-hover:bg-stripe-primary/10 transition-colors">
-              <FileIcon className="h-4 w-4 text-stripe-muted group-hover:text-stripe-primary transition-colors" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-stripe-border-light group-hover:bg-stripe-primary/10 transition-colors">
+            <FileIcon className="h-4 w-4 text-stripe-muted group-hover:text-stripe-primary transition-colors" />
+          </div>
+          <div className="min-w-0 flex-1">
+            {isEditing ? (
+              <div className="flex items-center gap-3" onClick={e => e.stopPropagation()}>
                 <div className="relative w-full">
                   {/* Create an invisible placeholder that maintains the exact text dimensions */}
                   <div className="invisible h-[22px]" aria-hidden="true">
@@ -135,113 +135,105 @@ export function FileItem({ file, onDelete, onRename, onCopy }: FileItemProps) {
                     onChange={(e) => setNewName(e.target.value)}
                     onBlur={handleRename}
                     onKeyDown={handleKeyDown}
-                    className="absolute inset-0 w-full text-[15px] text-stripe-text font-medium border-0 focus:ring-0 outline-none bg-white"
+                    className="absolute inset-0 w-full text-[15px] text-stripe-text font-medium border-0 focus:ring-0 focus:outline-none bg-white"
                     autoFocus
                   />
                   {/* Decorative border */}
                   <div className="absolute -inset-1.5 border border-stripe-primary rounded-lg shadow-stripe-sm pointer-events-none ring-1 ring-stripe-primary" />
                 </div>
               </div>
-              <div className="h-6 mt-1 flex gap-1.5 items-center overflow-hidden">
-                {error && <span className="text-xs text-stripe-danger">{error}</span>}
+            ) : (
+              <div className="flex items-center gap-3">
+                <span
+                  className="text-[15px] text-stripe-text font-medium truncate group-hover:text-stripe-primary transition-colors"
+                  title={file.name}
+                >
+                  {file.name}
+                </span>
               </div>
+            )}
+            <div className="h-6 mt-1 flex gap-1.5 items-center overflow-hidden">
+              {error ? (
+                <span className="text-xs text-stripe-danger">{error}</span>
+              ) : (
+                file.productList.slice(0, 4).map((product) => (
+                  <span
+                    key={product}
+                    className="px-2 py-0.5 text-xs font-medium rounded-full bg-stripe-border-light text-stripe-muted whitespace-nowrap"
+                  >
+                    {getCategoryTitle(product)}
+                  </span>
+                ))
+              )}
+              {!error && file.productList.length > 5 && (
+                <span
+                  className="px-2 py-0.5 text-xs font-medium rounded-full bg-stripe-border-light text-stripe-muted whitespace-nowrap"
+                  title={file.productList.slice(5).map(product => getCategoryTitle(product)).join(', ')}
+                >
+                  +{file.productList.length - 5} More
+                </span>
+              )}
             </div>
           </div>
-        ) : (
-          <>
-            <div className="flex items-center gap-4 min-w-0">
-              <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-stripe-border-light group-hover:bg-stripe-primary/10 transition-colors">
-                <FileIcon className="h-4 w-4 text-stripe-muted group-hover:text-stripe-primary transition-colors" />
+        </div>
+        <span className="text-sm text-stripe-muted whitespace-nowrap">
+          {formatDate(file.createdAt)}
+        </span>
+        <span className="text-sm text-stripe-muted whitespace-nowrap">
+          {formatDate(file.updatedAt)}
+        </span>
+        <div className="flex items-center gap-2 justify-end" onClick={e => e.stopPropagation()}>
+          <Link
+            href={`/editor/${file.id}`}
+            className="p-2 text-stripe-primary hover:text-stripe-primary-dark rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
+          >
+            <PenToolIcon className="h-4 w-4" />
+          </Link>
+          <button
+            onClick={handleCopy}
+            className="p-2 text-stripe-muted hover:text-stripe-text rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
+            title="Create copy"
+            disabled={isCopying}
+          >
+            <CopyIcon className="h-4 w-4" />
+          </button>
+          <button
+            onClick={async () => {
+              if (isToggling) return;
+              setIsToggling(true);
+              const result = await toggleFileVisibility(file.id);
+              if (result.success && typeof result.isPublic === 'boolean') {
+                setIsPublic(result.isPublic);
+              } else {
+                setError(result.error || 'Failed to toggle visibility');
+              }
+              setIsToggling(false);
+            }}
+            className="p-2 text-stripe-muted hover:text-stripe-text rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
+            disabled={isToggling}
+          >
+            <div className="relative w-4 h-4">
+              <div className={`absolute inset-0 transform transition-all duration-300 ${isPublic ? 'opacity-100 scale-100' : 'opacity-0 scale-y-0'}`}>
+                <EyeIcon className="h-4 w-4" />
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-3">
-                  <span
-                    className="text-[15px] text-stripe-text font-medium truncate group-hover:text-stripe-primary transition-colors"
-                    title={file.name}
-                  >
-                    {file.name}
-                  </span>
-                </div>
-                <div className="h-6 mt-1 flex gap-1.5 items-center overflow-hidden">
-                  {file.productList.slice(0, 4).map((product) => (
-                    <span
-                      key={product}
-                      className="px-2 py-0.5 text-xs font-medium rounded-full bg-stripe-border-light text-stripe-muted whitespace-nowrap"
-                    >
-                      {getCategoryTitle(product)}
-                    </span>
-                  ))}
-                  {file.productList.length > 4 && (
-                    <span
-                      className="px-2 py-0.5 text-xs font-medium rounded-full bg-stripe-border-light text-stripe-muted whitespace-nowrap"
-                      title={file.productList.slice(4).map(product => getCategoryTitle(product)).join(', ')}
-                    >
-                      +{file.productList.length - 4}
-                    </span>
-                  )}
-                </div>
+              <div className={`absolute inset-0 transform transition-all duration-300 ${!isPublic ? 'opacity-100 scale-100' : 'opacity-0 scale-y-0'}`}>
+                <EyeClosedIcon className="h-4 w-4" />
               </div>
             </div>
-            <span className="text-sm text-stripe-muted whitespace-nowrap">
-              {formatDate(file.createdAt)}
-            </span>
-            <span className="text-sm text-stripe-muted whitespace-nowrap">
-              {formatDate(file.updatedAt)}
-            </span>
-            <div className="flex items-center gap-2 justify-end" onClick={e => e.stopPropagation()}>
-              <Link
-                href={`/editor/${file.id}`}
-                className="p-2 text-stripe-primary hover:text-stripe-primary-dark rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
-              >
-                <PenToolIcon className="h-4 w-4" />
-              </Link>
-              <button
-                onClick={handleCopy}
-                className="p-2 text-stripe-muted hover:text-stripe-text rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
-                title="Create copy"
-                disabled={isCopying}
-              >
-                <CopyIcon className="h-4 w-4" />
-              </button>
-              <button
-                onClick={async () => {
-                  if (isToggling) return;
-                  setIsToggling(true);
-                  const result = await toggleFileVisibility(file.id);
-                  if (result.success && typeof result.isPublic === 'boolean') {
-                    setIsPublic(result.isPublic);
-                  } else {
-                    setError(result.error || 'Failed to toggle visibility');
-                  }
-                  setIsToggling(false);
-                }}
-                className="p-2 text-stripe-muted hover:text-stripe-text rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
-                disabled={isToggling}
-              >
-                <div className="relative w-4 h-4">
-                  <div className={`absolute inset-0 transform transition-all duration-300 ${isPublic ? 'opacity-100 scale-100' : 'opacity-0 scale-y-0'}`}>
-                    <EyeIcon className="h-4 w-4" />
-                  </div>
-                  <div className={`absolute inset-0 transform transition-all duration-300 ${!isPublic ? 'opacity-100 scale-100' : 'opacity-0 scale-y-0'}`}>
-                    <EyeClosedIcon className="h-4 w-4" />
-                  </div>
-                </div>
-              </button>
-              <button
-                onClick={() => setIsEditing(true)}
-                className="p-2 text-stripe-muted hover:text-stripe-text rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
-              >
-                <PencilIcon className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setShowDeleteConfirm(true)}
-                className="p-2 text-stripe-danger hover:text-stripe-danger-dark rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
-              >
-                <Trash2Icon className="h-4 w-4" />
-              </button>
-            </div>
-          </>
-        )}
+          </button>
+          <button
+            onClick={() => setIsEditing(true)}
+            className="p-2 text-stripe-muted hover:text-stripe-text rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
+          >
+            <PencilIcon className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="p-2 text-stripe-danger hover:text-stripe-danger-dark rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"
+          >
+            <Trash2Icon className="h-4 w-4" />
+          </button>
+        </div>
       </div>
       {showDeleteConfirm && (
         <div

@@ -55,10 +55,13 @@ export async function getFileData(id: string) {
   }
 
   try {
-    const file = await db.file.findUnique({
+    const file = await db.file.findFirst({
       where: {
         id,
-        userId: user.id
+        OR: [
+          { userId: user.id },
+          { isPublic: true }
+        ]
       },
       select: {
         id: true,
@@ -66,15 +69,24 @@ export async function getFileData(id: string) {
         folderId: true,
         puckData: true,
         createdAt: true,
-        updatedAt: true
+        updatedAt: true,
+        isPublic: true,
+        userId: true
       }
     })
 
     if (!file) {
-      return { success: false, error: 'File not found' }
+      return { success: false, error: 'File not found or not accessible' }
     }
 
-    return { success: true, file }
+    return { 
+      success: true, 
+      file: {
+        ...file,
+        canEdit: file.userId === user.id
+      },
+      currentUserId: user.id
+    }
   } catch (error) {
     console.error('Failed to get file data:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Failed to get file data' }
