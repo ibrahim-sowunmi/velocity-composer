@@ -176,6 +176,8 @@ export async function deleteFolder(id: string) {
     return { success: false, error: 'User not found' }
   }
 
+  const userId = user.id // Store user.id to avoid null checks
+
   try {
     // Use a transaction to ensure data consistency
     const result = await db.$transaction(async (tx) => {
@@ -183,7 +185,7 @@ export async function deleteFolder(id: string) {
       const folder = await tx.folder.findUnique({
         where: { 
           id,
-          userId: user.id
+          userId
         }
       })
 
@@ -191,28 +193,59 @@ export async function deleteFolder(id: string) {
         throw new Error('Folder not found');
       }
 
-      // Move all files to the parent folder (or root if no parent)
-      await tx.file.updateMany({
-        where: {
-          folderId: id,
-          userId: user.id
-        },
-        data: {
-          folderId: folder.parentId // null if no parent folder
-        }
-      })
+      // Recursively get all descendant folder IDs
+      async function getAllDescendantFolderIds(folderId: string): Promise<string[]> {
+        const childFolders = await tx.folder.findMany({
+          where: {
+            parentId: folderId,
+            userId
+          },
+          select: {
+            id: true
+          }
+        });
+        
+        const childIds = childFolders.map(f => f.id);
+        const descendantIds = await Promise.all(childIds.map(getAllDescendantFolderIds));
+        
+        return [...childIds, ...descendantIds.flat()];
+      }
 
-      // Delete the folder
+      // Get all descendant folder IDs
+      const descendantFolderIds = await getAllDescendantFolderIds(id);
+      const allFolderIds = [id, ...descendantFolderIds];
+
+      // Delete all files in all affected folders
+      await tx.file.deleteMany({
+        where: {
+          userId,
+          folderId: {
+            in: allFolderIds
+          }
+        }
+      });
+
+      // Delete all descendant folders
+      await tx.folder.deleteMany({
+        where: {
+          userId,
+          id: {
+            in: descendantFolderIds
+          }
+        }
+      });
+
+      // Finally, delete the target folder
       await tx.folder.delete({
         where: { 
           id,
-          userId: user.id
+          userId
         }
-      })
+      });
 
       // Update parent folder timestamps
       if (folder.parentId) {
-        await updateParentFolderTimestamps(folder.parentId, user.id);
+        await updateParentFolderTimestamps(folder.parentId, userId);
       }
 
       return folder;

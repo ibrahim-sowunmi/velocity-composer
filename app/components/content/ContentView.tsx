@@ -248,12 +248,12 @@ export function ContentView({
         <div className="flex items-center gap-2">
           <div 
             ref={headerRef}
-            className={`inline-flex items-center gap-2 text-sm py-1 px-2 rounded-lg transition-all duration-300 ${
-              isDragging && !isMoving ? 'bg-stripe-primary/5' : ''
+            className={`inline-flex items-center gap-2 text-sm py-1 px-2 rounded-lg transition-all duration-300 ease-in-out transform ${
+              isDragging && !isMoving ? 'bg-stripe-primary/5 scale-105' : 'scale-100'
             }`}
           >
             {isDragging ? (
-              <UndoIcon className="h-8 w-8 text-stripe-primary animate-in fade-in" />
+              <UndoIcon className="h-8 w-8 text-stripe-primary animate-in fade-in duration-300 slide-in-from-left-2" />
             ) : null}
             <div className="flex items-center gap-2">
               <Link href="/library" className="text-stripe-muted hover:text-stripe-primary">

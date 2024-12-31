@@ -251,7 +251,7 @@ export function FolderItem({ folder, onDelete, onRename, onItemMove }: FolderIte
           >
             <h2 className="text-xl font-semibold text-stripe-text mb-4">Delete Folder</h2>
             <p className="text-sm text-stripe-muted mb-6">
-              Are you sure you want to delete &quot;{folder.name}&quot;? Any files inside will be moved to the parent folder.
+              Are you sure you want to delete &quot;{folder.name}&quot;? Any emails inside will be <span className="font-medium">permanently deleted</span>.
             </p>
             <div className="flex justify-end gap-3">
               <button
