@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { File } from '@prisma/client'
 import { FileIcon, PencilIcon, Trash2Icon, PenToolIcon, EyeIcon, EyeClosedIcon, CopyIcon } from 'lucide-react'
 import Link from 'next/link'
@@ -8,6 +8,9 @@ import { useRouter } from 'next/navigation'
 import { puckConfig } from '@/app/config/puck'
 import { toggleFileVisibility, copyFile } from '@/app/actions/file'
 import { getFolderContents } from '@/app/actions/folder'
+import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine'
+import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter'
+import invariant from 'tiny-invariant'
 
 interface FileItemProps {
   file: File & {
@@ -16,9 +19,10 @@ interface FileItemProps {
   onDelete: (id: string) => Promise<{ success: boolean; error?: string }>
   onRename: (id: string, newName: string) => Promise<{ success: boolean; error?: string }>
   onCopy?: (files: File[]) => void
+  onItemMove?: (itemId: string, itemType: 'file' | 'folder') => void
 }
 
-export function FileItem({ file, onDelete, onRename, onCopy }: FileItemProps) {
+export function FileItem({ file, onDelete, onRename, onCopy, onItemMove }: FileItemProps) {
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [newName, setNewName] = useState(file.name)
@@ -27,6 +31,20 @@ export function FileItem({ file, onDelete, onRename, onCopy }: FileItemProps) {
   const [isToggling, setIsToggling] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isCopying, setIsCopying] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const element = ref.current
+    invariant(element)
+
+    return draggable({
+      element,
+      getInitialData: () => ({ id: file.id, type: 'file' }),
+      onDragStart: () => setIsDragging(true),
+      onDrop: () => setIsDragging(false),
+    })
+  }, [file.id])
 
   const formatDate = (date: Date) => {
     const d = new Date(date)
@@ -112,7 +130,10 @@ export function FileItem({ file, onDelete, onRename, onCopy }: FileItemProps) {
 
   return (
     <div
-      className="group relative hover:bg-stripe-light transition-colors duration-200 cursor-pointer"
+      ref={ref}
+      className={`group relative transition-colors duration-200 cursor-pointer border border-transparent ${
+        isDragging ? 'opacity-50' : ''
+      }`}
       onClick={handleClick}
     >
       <div className="grid grid-cols-[minmax(400px,2fr)_200px_200px_180px] gap-6 items-center px-6 py-4">

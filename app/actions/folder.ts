@@ -275,4 +275,86 @@ export async function renameFolder(id: string, newName: string) {
     console.error('Failed to rename folder:', error);
     return { success: false, error: 'Failed to rename folder' }
   }
+}
+
+export async function moveFolder(folderId: string, newParentId: string | null) {
+  const session = await auth()
+  if (!session || !session.user) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  const user = await db.user.findUnique({
+    where: {
+      email: session.user.email as string,
+    },
+    select: {
+      id: true
+    }
+  })
+
+  if (!user) {
+    return { success: false, error: 'User not found' }
+  }
+
+  try {
+    const result = await db.$transaction(async (tx) => {
+      // Get the current folder to check ownership and get the old parentId
+      const currentFolder = await tx.folder.findFirst({
+        where: {
+          id: folderId,
+          userId: user.id
+        }
+      })
+
+      if (!currentFolder) {
+        throw new Error('Folder not found or unauthorized')
+      }
+
+      // Only check for cycles if we're moving to a new parent
+      if (newParentId) {
+        // Prevent moving a folder into itself or its descendants
+        let parent = await tx.folder.findUnique({
+          where: { id: newParentId }
+        })
+        while (parent) {
+          if (parent.id === folderId) {
+            throw new Error('Cannot move a folder into itself or its descendants')
+          }
+          if (!parent.parentId) break
+          parent = await tx.folder.findUnique({
+            where: { id: parent.parentId }
+          })
+        }
+      }
+
+      // Update the folder with the new parent
+      const updatedFolder = await tx.folder.update({
+        where: {
+          id: folderId,
+          userId: user.id
+        },
+        data: {
+          parentId: newParentId
+        }
+      })
+
+      // Update timestamps for both old and new parent folders
+      if (currentFolder.parentId) {
+        await updateParentFolderTimestamps(currentFolder.parentId, user.id)
+      }
+      if (newParentId) {
+        await updateParentFolderTimestamps(newParentId, user.id)
+      }
+
+      return updatedFolder
+    })
+
+    // Revalidate all affected paths
+    revalidatePath('/library')
+    if (result.parentId) revalidatePath(`/folder/${result.parentId}`)
+    return { success: true, folder: result }
+  } catch (error) {
+    console.error('Failed to move folder:', error)
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to move folder' }
+  }
 } 

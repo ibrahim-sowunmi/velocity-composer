@@ -1,22 +1,110 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Folder } from '@prisma/client'
 import { FolderIcon, PencilIcon, Trash2Icon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { dropTargetForElements, draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter'
+import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine'
+import invariant from 'tiny-invariant'
+import { moveFile } from '@/app/actions/file'
+import { moveFolder } from '@/app/actions/folder'
 
 interface FolderItemProps {
   folder: Folder
   onDelete: (id: string) => Promise<{ success: boolean; error?: string }>
   onRename: (id: string, newName: string) => Promise<{ success: boolean; error?: string }>
+  onItemMove?: (itemId: string, itemType: 'file' | 'folder') => void
 }
 
-export function FolderItem({ folder, onDelete, onRename }: FolderItemProps) {
+interface DragData {
+  id: string
+  type: 'file' | 'folder'
+}
+
+function isDragData(data: unknown): data is DragData {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'id' in data &&
+    'type' in data &&
+    typeof (data as any).id === 'string' &&
+    ((data as any).type === 'file' || (data as any).type === 'folder')
+  )
+}
+
+export function FolderItem({ folder, onDelete, onRename, onItemMove }: FolderItemProps) {
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [newName, setNewName] = useState(folder.name)
   const [error, setError] = useState<string | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isDropTarget, setIsDropTarget] = useState(false)
+  const [isMoving, setIsMoving] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const element = ref.current
+    invariant(element)
+
+    return combine(
+      draggable({
+        element,
+        getInitialData: () => ({ id: folder.id, type: 'folder' }),
+        onDragStart: () => setIsDragging(true),
+        onDrop: () => setIsDragging(false),
+      }),
+      dropTargetForElements({
+        element,
+        canDrop: ({ source }) => {
+          if (!isDragData(source.data)) return false
+          // Prevent dropping on itself
+          if (source.data.type === 'folder' && source.data.id === folder.id) return false
+          return true
+        },
+        onDragEnter: () => {
+          setIsDropTarget(true)
+          element.classList.add('bg-stripe-primary')
+        },
+        onDragLeave: () => {
+          setIsDropTarget(false)
+          element.classList.remove('bg-stripe-primary')
+        },
+        onDrop: async ({ source }) => {
+          setIsDropTarget(false)
+          element.classList.remove('bg-stripe-primary')
+          
+          if (!isDragData(source.data) || isMoving) return
+
+          try {
+            setIsMoving(true)
+            setError(null)
+            
+            let result
+            if (source.data.type === 'file') {
+              result = await moveFile(source.data.id, folder.id)
+            } else {
+              result = await moveFolder(source.data.id, folder.id)
+            }
+
+            if (result.success) {
+              // Only notify about the move if it was successful
+              onItemMove?.(source.data.id, source.data.type)
+            } else {
+              setError(result.error || `Failed to move ${source.data.type}`)
+            }
+            router.refresh()
+          } catch (err) {
+            setError(`Failed to move ${source.data.type}`)
+            console.error(`Error moving ${source.data.type}:`, err)
+          } finally {
+            setIsMoving(false)
+          }
+        },
+      })
+    )
+  }, [folder.id, router, isMoving, onItemMove])
 
   const formatDate = (date: Date) => {
     const d = new Date(date)
@@ -74,7 +162,12 @@ export function FolderItem({ folder, onDelete, onRename }: FolderItemProps) {
 
   return (
     <div 
-      className="group relative hover:bg-stripe-light transition-colors duration-200 cursor-pointer"
+      ref={ref}
+      className={`group relative transition-colors duration-200 cursor-pointer border border-transparent ${
+        isDragging ? 'opacity-50' : ''
+      } ${
+        isDropTarget ? 'bg-stripe-primary' : 'hover:bg-stripe-light'
+      }`}
       onClick={handleClick}
     >
       <div className="grid grid-cols-[minmax(400px,2fr)_200px_200px_180px] gap-6 items-center px-6 py-4">

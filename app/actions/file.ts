@@ -516,4 +516,69 @@ export async function copyFile(id: string, currentFolderId?: string) {
     console.error('Failed to copy file:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Failed to copy file' }
   }
+}
+
+export async function moveFile(fileId: string, newFolderId: string | null) {
+  const session = await auth()
+  if (!session || !session.user) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  const user = await db.user.findUnique({
+    where: {
+      email: session.user.email as string,
+    },
+    select: {
+      id: true
+    }
+  })
+
+  if (!user) {
+    return { success: false, error: 'User not found' }
+  }
+
+  try {
+    const result = await db.$transaction(async (tx) => {
+      // Get the current file to check ownership and get the old folderId
+      const currentFile = await tx.file.findFirst({
+        where: {
+          id: fileId,
+          userId: user.id
+        }
+      })
+
+      if (!currentFile) {
+        throw new Error('File not found or unauthorized')
+      }
+
+      // Update the file with the new folder
+      const updatedFile = await tx.file.update({
+        where: {
+          id: fileId,
+          userId: user.id
+        },
+        data: {
+          folderId: newFolderId
+        }
+      })
+
+      // Update timestamps for both old and new parent folders
+      if (currentFile.folderId) {
+        await updateParentFolderTimestamps(currentFile.folderId, user.id)
+      }
+      if (newFolderId) {
+        await updateParentFolderTimestamps(newFolderId, user.id)
+      }
+
+      return updatedFile
+    })
+
+    // Revalidate all affected paths
+    revalidatePath('/library')
+    if (result.folderId) revalidatePath(`/folder/${result.folderId}`)
+    return { success: true, file: result }
+  } catch (error) {
+    console.error('Failed to move file:', error)
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to move file' }
+  }
 } 

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@atlaskit/pragmatic-drag-and-drop": "^1.4.0",
     "@auth/mongodb-adapter": "^3.7.4",
     "@auth/prisma-adapter": "^2.7.4",
     "@measured/puck": "^0.17.1",
