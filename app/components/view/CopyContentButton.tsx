@@ -106,7 +106,7 @@ export function CopyContentButton({ buttonBaseStyles, getContent }: CopyContentB
           error 
             ? 'bg-red-50 hover:bg-red-100 text-red-700 border border-red-200'
             : copied
-            ? 'bg-[#0A2540] hover:bg-[#0A2540]/90 text-white border border-[#0A2540]'
+            ? 'bg-green-600 hover:bg-green-600 text-white border border-green-600'
             : 'bg-[#635BFF] hover:bg-[#635BFF]/90 text-white border border-[#635BFF]'
         }`}
         title={error || "Copy to clipboard"}

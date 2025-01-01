@@ -26,10 +26,7 @@ export default function MainLayout({
               </a>
             </div>
             <div className="text-sm text-stripe-muted">
-              Created with ❤️ by{' '}
-              @Ibrahims
-              {' '}and{' '}
-              @lorenzopasanisi
+              Created with ❤️ by SAs
             </div>
           </div>
         </div>
