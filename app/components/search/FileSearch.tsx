@@ -142,7 +142,7 @@ export function FileSearch({ currentFolderId }: FileSearchProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Search public files..."
+          placeholder="Search public emails..."
           className="w-full pl-10 pr-4 py-2 text-sm border border-stripe-border rounded-lg shadow-stripe-sm focus:border-stripe-primary focus:ring-1 focus:ring-stripe-primary outline-none"
         />
         {isLoading && (

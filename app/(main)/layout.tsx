@@ -18,9 +18,6 @@ export default function MainLayout({
               <a href="https://docs.velocitycomposer.com" target="_blank" rel="noopener noreferrer" className="text-sm text-stripe-muted hover:text-stripe-text transition-colors">
                 Docs
               </a>
-              <a href="https://github.com/velocity-composer/velocity-composer/issues/new?labels=enhancement" target="_blank" rel="noopener noreferrer" className="text-sm text-stripe-muted hover:text-stripe-text transition-colors">
-                Feature Reqs
-              </a>
               <a href="https://github.com/velocity-composer/velocity-composer/issues/new?labels=feedback" target="_blank" rel="noopener noreferrer" className="text-sm text-stripe-muted hover:text-stripe-text transition-colors">
                 Feedback
               </a>

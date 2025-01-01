@@ -1,6 +1,7 @@
 import React from 'react';
 import { PaymentComponents } from './puck/components/payments';
 import { BillingComponents } from './puck/components/billing';
+import { CustomComponents } from './puck/components/custom';
 
 // Puck configuration for the application
 export const puckConfig = {
@@ -8,6 +9,7 @@ export const puckConfig = {
   components: {
     ...PaymentComponents,
     ...BillingComponents,
+    ...CustomComponents,
   },
 
   // Categories configuration
@@ -15,12 +17,12 @@ export const puckConfig = {
     payments: {
       title: "PAYMENTS (Core Platform)",
       components: ["PaymentIntent", "PaymentMethods"],
-      defaultExpanded: true,
+      defaultExpanded: false,
     },
     billing: {
       title: "BILLING",
       components: ["AutomaticCardUpdates",],
-      defaultExpanded: true,
+      defaultExpanded: false,
     },
     connect: {
       title: "CONNECT",
@@ -74,7 +76,7 @@ export const puckConfig = {
     },
     other: {
       title: "Other Components",
-      defaultExpanded: false,
+      defaultExpanded: true,
     },
   },
 

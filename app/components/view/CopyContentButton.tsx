@@ -18,13 +18,122 @@ export function CopyContentButton({ buttonBaseStyles, getContent }: CopyContentB
       
       if (!content) return
 
+      // Create a temporary container in memory
+      const tempContainer = document.createElement('div')
+      tempContainer.innerHTML = content
+
+      // Handle images - convert them to canvas elements to ensure they're copied
+      const images = tempContainer.getElementsByTagName('img')
+      await Promise.all(Array.from(images).map(async (img) => {
+        try {
+          const canvas = document.createElement('canvas')
+          const ctx = canvas.getContext('2d')
+          if (!ctx) {
+            console.warn('Canvas 2D context not available')
+            return // Keep original image
+          }
+          const imgObj = new Image()
+          
+          // Function to try loading image with proxy if direct load fails
+          const loadImage = async (src: string, useProxy = false): Promise<void> => {
+            return new Promise((resolve, reject) => {
+              imgObj.onload = () => resolve()
+              imgObj.onerror = () => {
+                if (!useProxy) {
+                  // If direct load fails, try with proxy
+                  const proxyUrl = `https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url=${encodeURIComponent(src)}`
+                  loadImage(proxyUrl, true).then(resolve).catch(() => {
+                    reject(new Error(`Failed to load image${useProxy ? ' with proxy' : ''}: ${src}`))
+                  })
+                } else {
+                  reject(new Error(`Failed to load image with proxy: ${src}`))
+                }
+              }
+              imgObj.crossOrigin = 'anonymous'
+              imgObj.src = src
+            })
+          }
+
+          // Try to load the image
+          await loadImage(img.src)
+            
+          // Only proceed if we have valid dimensions
+          if (imgObj.width > 0 && imgObj.height > 0) {
+            canvas.width = imgObj.width
+            canvas.height = imgObj.height
+            ctx.drawImage(imgObj, 0, 0)
+              
+            try {
+              // Try to export as PNG first
+              const dataUrl = canvas.toDataURL('image/png')
+              const newImg = document.createElement('img')
+              // Preserve original image attributes
+              newImg.src = dataUrl
+              newImg.style.width = img.style.width || img.getAttribute('width') || `${imgObj.width}px`
+              newImg.style.height = img.style.height || img.getAttribute('height') || `${imgObj.height}px`
+              
+              // Preserve alignment if it exists
+              const alignment = img.style.float || img.getAttribute('align')
+              if (alignment) {
+                newImg.style.float = alignment === 'left' || alignment === 'right' ? alignment : 'none'
+              }
+              
+              // Add display block and margin for center alignment
+              if (img.style.margin === '0 auto' || img.style.display === 'block' || img.parentElement?.style.textAlign === 'center') {
+                newImg.style.display = 'block'
+                newImg.style.margin = '0 auto'
+              }
+              
+              img.replaceWith(newImg)
+            } catch {
+              // Fallback to JPEG if PNG fails
+              try {
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.95)
+                const newImg = document.createElement('img')
+                // Preserve original image attributes
+                newImg.src = dataUrl
+                newImg.style.width = img.style.width || img.getAttribute('width') || `${imgObj.width}px`
+                newImg.style.height = img.style.height || img.getAttribute('height') || `${imgObj.height}px`
+                
+                // Preserve alignment if it exists
+                const alignment = img.style.float || img.getAttribute('align')
+                if (alignment) {
+                  newImg.style.float = alignment === 'left' || alignment === 'right' ? alignment : 'none'
+                }
+                
+                // Add display block and margin for center alignment
+                if (img.style.margin === '0 auto' || img.style.display === 'block' || img.parentElement?.style.textAlign === 'center') {
+                  newImg.style.display = 'block'
+                  newImg.style.margin = '0 auto'
+                }
+                
+                img.replaceWith(newImg)
+              } catch {
+                console.warn('Failed to convert image to data URL:', img.src)
+                // Keep original image
+              }
+            }
+          } else {
+            console.warn('Image has invalid dimensions:', img.src)
+            // Keep original image
+          }
+        } catch (error) {
+          // Log warning instead of error since the functionality still works
+          console.warn('Image processing skipped:', {
+            src: img.src,
+            error: error instanceof Error ? error.message : 'Unknown error'
+          })
+          // Keep original image
+        }
+      }))
+
       // Try the modern clipboard API first
       if (navigator.clipboard && window.isSecureContext) {
         try {
           // Create a blob with HTML content type
-          const htmlBlob = new Blob([content], { type: 'text/html' })
+          const htmlBlob = new Blob([tempContainer.innerHTML], { type: 'text/html' })
           // Also create a plain text version
-          const plainTextBlob = new Blob([content.replace(/<[^>]+>/g, '')], { type: 'text/plain' })
+          const plainTextBlob = new Blob([tempContainer.textContent || ''], { type: 'text/plain' })
           
           const clipboardItem = new ClipboardItem({
             'text/html': htmlBlob,
@@ -34,15 +143,13 @@ export function CopyContentButton({ buttonBaseStyles, getContent }: CopyContentB
         } catch (clipboardErr) {
           console.error('Failed to use clipboard API:', clipboardErr)
           // If modern approach fails, try the selection approach
-          const tempDiv = document.createElement('div')
-          tempDiv.innerHTML = content
-          tempDiv.style.position = 'fixed'
-          tempDiv.style.pointerEvents = 'none'
-          tempDiv.style.opacity = '0'
-          document.body.appendChild(tempDiv)
+          document.body.appendChild(tempContainer)
+          tempContainer.style.position = 'fixed'
+          tempContainer.style.pointerEvents = 'none'
+          tempContainer.style.opacity = '0'
           
           const range = document.createRange()
-          range.selectNodeContents(tempDiv)
+          range.selectNodeContents(tempContainer)
           
           const selection = window.getSelection()
           if (selection) {
@@ -56,21 +163,19 @@ export function CopyContentButton({ buttonBaseStyles, getContent }: CopyContentB
               throw new Error('Copy failed')
             } finally {
               selection.removeAllRanges()
-              tempDiv.remove()
+              tempContainer.remove()
             }
           }
         }
       } else {
         // Fallback for older browsers
-        const tempDiv = document.createElement('div')
-        tempDiv.innerHTML = content
-        tempDiv.style.position = 'fixed'
-        tempDiv.style.pointerEvents = 'none'
-        tempDiv.style.opacity = '0'
-        document.body.appendChild(tempDiv)
+        document.body.appendChild(tempContainer)
+        tempContainer.style.position = 'fixed'
+        tempContainer.style.pointerEvents = 'none'
+        tempContainer.style.opacity = '0'
         
         const range = document.createRange()
-        range.selectNodeContents(tempDiv)
+        range.selectNodeContents(tempContainer)
         
         const selection = window.getSelection()
         if (selection) {
@@ -84,7 +189,7 @@ export function CopyContentButton({ buttonBaseStyles, getContent }: CopyContentB
             throw new Error('Copy failed')
           } finally {
             selection.removeAllRanges()
-            tempDiv.remove()
+            tempContainer.remove()
           }
         }
       }

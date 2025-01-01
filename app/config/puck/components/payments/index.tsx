@@ -91,8 +91,8 @@ export const PaymentComponents = {
       links?: Array<{ label: string; url: string; }>;
     }) => {
       return (
-        <div className="p-6 bg-white rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold mb-4">{title}</h2>
+        <div className="p-6 bg-white rounded-lg shadow-sm">
+          <h2 className="text-xl font-bold mb-4">{title}</h2>
           <p className="text-gray-700 mb-6">{description}</p>
           
           <div className="grid grid-cols-2 gap-6 mb-6">
