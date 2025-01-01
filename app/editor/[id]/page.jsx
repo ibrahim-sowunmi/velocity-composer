@@ -7,6 +7,7 @@ import { use } from "react"
 import { getFileData, saveFileData } from "@/app/actions/file"
 import { puckConfig } from "@/app/config/puck"
 import Link from "next/link"
+import { Loader } from "lucide-react"
 
 // Navigation Buttons Component
 const NavigationButtons = ({ file }) => {
@@ -43,7 +44,7 @@ const NavigationButtons = ({ file }) => {
 }
 
 // Custom Publish Button Component
-const CustomPublishButton = ({ fileId }) => {
+const CustomPublishButton = ({ fileId, onPublish }) => {
   const { appState } = usePuck()
   const [isSuccess, setIsSuccess] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -51,6 +52,8 @@ const CustomPublishButton = ({ fileId }) => {
   const handleSave = async () => {
     try {
       setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
       const result = await saveFileData(fileId, appState.data)
       if (!result.success) {
         throw new Error(result.error || 'Failed to save')
@@ -58,6 +61,8 @@ const CustomPublishButton = ({ fileId }) => {
       // Show success state
       setIsSuccess(true)
       setTimeout(() => setIsSuccess(false), 1000)
+      onPublish()
+
     } catch (err) {
       console.error('Save error:', err)
       alert('Failed to save changes')
@@ -71,8 +76,9 @@ const CustomPublishButton = ({ fileId }) => {
       onClick={handleSave}
       disabled={isSaving}
       className={`
-        inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md
-        shadow-stripe-sm transition-all
+        inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md
+        shadow-stripe-sm transition-all duration-500
+        min-w-[100px] h-[36px] w-[100px]
         ${isSuccess 
           ? 'bg-green-600 text-white hover:bg-green-700' 
           : 'bg-stripe-primary text-white hover:bg-stripe-primary-dark'
@@ -82,16 +88,38 @@ const CustomPublishButton = ({ fileId }) => {
         disabled:hover:shadow-stripe-sm
       `}
     >
-      {isSaving ? 'Saving...' : isSuccess ? 'Saved!' : 'Publish'}
+      {isSaving ? <Loader className="animate-spin h-4 w-4"/> :  'Publish'}
     </button>
   )
 }
+
+// Status Indicator Component
+const PublishStatus = ({ show }) => {
+  if (!show) return null;
+  
+  return (
+    <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-6 duration-300">
+      <div className="flex items-center gap-3 py-2.5 px-3.5 bg-white rounded-md shadow-stripe hover:shadow-stripe-lg transition-all">
+        <div className="w-2 h-2 rounded-full bg-green-600 animate-pulse" />
+        <span className="text-sm font-medium text-gray-600">Changes published</span>
+        <span className="text-xs text-stripe-muted">•</span>
+        <span className="text-xs text-stripe-muted">Just now</span>
+      </div>
+    </div>
+  );
+};
 
 // Editor Component
 function Editor({ fileId }) {
   const [fileData, setFileData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [showStatus, setShowStatus] = useState(false)
+
+  const handlePublish = () => {
+    setShowStatus(true)
+    setTimeout(() => setShowStatus(false), 3000)
+  }
 
   useEffect(() => {
     let mounted = true
@@ -176,11 +204,12 @@ function Editor({ fileId }) {
           headerActions: () => (
             <div className="flex items-center gap-4">
               <NavigationButtons file={fileData} />
-              <CustomPublishButton fileId={fileId} />
+              <CustomPublishButton fileId={fileId} onPublish={handlePublish} />
             </div>
           )
         }}
       />
+      <PublishStatus show={showStatus} />
     </div>
   )
 }
