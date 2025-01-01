@@ -4,7 +4,9 @@ import { Config } from "@measured/puck";
 import { useCallback, useState } from "react";
 
 type ImageBlockProps = {
-  imageUrl: string;
+  imageSource: "url" | "upload";
+  imageUrl?: string;
+  imageData?: string;
   altText: string;
   width?: string;
   height?: string;
@@ -42,7 +44,7 @@ const createBlob = (canvas: HTMLCanvasElement, format: string, quality?: number,
 // Function to downscale image if needed
 const downscaleImage = async (file: File, currentQuality: number = 0.9): Promise<{ blob: Blob, format: string } | null> => {
   return new Promise((resolve) => {
-    const img = new Image();
+    const img = new window.Image();
     img.onload = async () => {
       URL.revokeObjectURL(img.src);
 
@@ -79,7 +81,10 @@ const downscaleImage = async (file: File, currentQuality: number = 0.9): Promise
             break;
           }
         }
-      } catch (e) {
+      /* eslint-disable @typescript-eslint/no-unused-vars */
+      } catch (_) {
+      /* eslint-enable @typescript-eslint/no-unused-vars */
+        // Ignore error, assume no transparency
         hasTransparency = false;
       }
 
@@ -144,11 +149,25 @@ const getDownscaledImage = async (file: File): Promise<{ blob: Blob, quality: nu
 export const ImageBlock: Config<{ ImageBlock: ImageBlockProps }>["components"] = {
   ImageBlock: {
     fields: {
+      imageSource: {
+        type: "radio",
+        label: "Image Source",
+        options: [
+          { label: "URL", value: "url" },
+          { label: "Upload", value: "upload" }
+        ]
+      },
+
       imageUrl: {
+        type: "text",
+        label: "Image URL"
+      },
+
+      imageData: {
         type: "custom",
-        label: "Upload or URL",
-        render: ({ name, onChange, value, field }) => {
-          const [localUrl, setLocalUrl] = useState(value);
+        label: "Upload Image",
+        /* eslint-disable react-hooks/rules-of-hooks */
+        render: ({ onChange, value }) => {
           const [error, setError] = useState<string | null>(null);
 
           const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,26 +175,32 @@ export const ImageBlock: Config<{ ImageBlock: ImageBlockProps }>["components"] =
             if (!file) return;
 
             try {
-              // Try to downscale if needed
               const result = await getDownscaledImage(file);
-
+              
               if (result) {
                 const { blob, quality, format } = result;
-                const objectUrl = URL.createObjectURL(blob);
-                setError(null);
-                setLocalUrl(objectUrl);
-                onChange(objectUrl);
-
-                if (quality < 1 || format !== file.type) {
-                  const formatChanged = format !== file.type ? ` (converted to ${format.split('/')[1]})` : '';
-                  const qualityInfo = quality < 1 ? ` (quality: ${Math.round(quality * 100)}%)` : '';
-                  setError(`Image was compressed to ${(blob.size / 1024).toFixed(1)}KB${formatChanged}${qualityInfo}`);
-                }
+                
+                // Convert blob to base64
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  const base64data = reader.result as string;
+                  onChange(base64data);
+                  
+                  if (quality < 1 || format !== file.type) {
+                    const formatChanged = format !== file.type ? ` (converted to ${format.split('/')[1]})` : '';
+                    const qualityInfo = quality < 1 ? ` (quality: ${Math.round(quality * 100)}%)` : '';
+                    setError(`Image was compressed to ${(blob.size / 1024).toFixed(1)}KB${formatChanged}${qualityInfo}`);
+                  } else {
+                    setError(null);
+                  }
+                };
+                reader.readAsDataURL(blob);
               } else {
                 setError('Unable to compress image below 256KB. Please try a different image.');
                 e.target.value = '';
               }
-            } catch (err) {
+            } catch (error) {
+              console.error('Error processing image:', error);
               setError('Error processing image. Please try another file.');
               e.target.value = '';
             }
@@ -183,51 +208,26 @@ export const ImageBlock: Config<{ ImageBlock: ImageBlockProps }>["components"] =
 
           return (
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <p style={{
-                fontSize: "12px",
-                fontWeight: 600,
-                color: "#6B7280",
-                margin: "0"
-              }}>Upload image or Enter URL (images will be automatically resized if needed)</p>
               <input
-                type="text"
-                value={localUrl || ""}
-                onChange={(e) => {
-                  setError(null);
-                  setLocalUrl(e.target.value);
-                  onChange(e.target.value);
-                }}
-                placeholder="Enter image URL"
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  border: "1px solid #ccc",
-                  borderRadius: "4px"
-                }}
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                style={{ marginTop: "8px" }}
               />
-
-              <div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  style={{ marginTop: "8px" }}
-                />
-                {error && (
-                  <p style={{
-                    color: error.includes("compressed to") ? "#059669" : "#DC2626",
-                    fontSize: "12px",
-                    margin: "4px 0 0 0"
-                  }}>
-                    {error}
-                  </p>
-                )}
-              </div>
-
-              {localUrl && (
+              {error && (
+                <p style={{
+                  color: error.includes("compressed to") ? "#059669" : "#DC2626",
+                  fontSize: "12px",
+                  margin: "4px 0 0 0"
+                }}>
+                  {error}
+                </p>
+              )}
+              {value && (
                 <div style={{ marginTop: "8px" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={localUrl}
+                    src={value}
                     alt="Preview"
                     style={{
                       maxWidth: "200px",
@@ -240,6 +240,7 @@ export const ImageBlock: Config<{ ImageBlock: ImageBlockProps }>["components"] =
             </div>
           );
         }
+        /* eslint-enable react-hooks/rules-of-hooks */
       },
 
       alignment: {
@@ -251,12 +252,10 @@ export const ImageBlock: Config<{ ImageBlock: ImageBlockProps }>["components"] =
           { label: "Right", value: "right" }
         ]
       },
-
       altText: {
         type: "text",
         label: "Alt Text",
       },
-
       width: {
         type: "text",
         label: "Width (e.g., 100%, 200px)",
@@ -266,23 +265,25 @@ export const ImageBlock: Config<{ ImageBlock: ImageBlockProps }>["components"] =
         label: "Height (e.g., auto, 200px)",
       }
     },
-
     defaultProps: {
+      imageSource: "url",
       imageUrl: "",
+      imageData: "",
       altText: "",
       width: "100%",
       height: "auto",
       alignment: "left"
     },
-
-    render: ({ imageUrl, altText, width, height, alignment }) => {
+    render: ({ imageSource, imageUrl, imageData, altText, width, height, alignment }) => {
       const containerStyle = {
         display: "flex",
         justifyContent: alignment === "center" ? "center" : alignment === "right" ? "flex-end" : "flex-start",
         width: "100%"
       };
 
-      if (!imageUrl) {
+      const finalImageUrl = imageSource === "upload" ? imageData : imageUrl;
+
+      if (!finalImageUrl) {
         return (
           <div style={{
             padding: "20px",
@@ -298,19 +299,20 @@ export const ImageBlock: Config<{ ImageBlock: ImageBlockProps }>["components"] =
       }
 
       return (
-        <div className="p-6 bg-white rounded-lg shadow-md">
-          <div style={containerStyle}>
-            <img
-              src={imageUrl}
-              alt={altText}
-              style={{
-                display: "block",
-                width: width || "100%",
-                height: height || "auto",
-                objectFit: "contain"
-              }}
-            />
-          </div>
+        <div className="p-6 bg-white rounded-lg shadow-sm">          
+        <div style={containerStyle}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={finalImageUrl}
+            alt={altText}
+            style={{
+              display: "block",
+              width: width || "100%",
+              height: height || "auto",
+              objectFit: "contain"
+            }}
+          />
+        </div>
         </div>
       );
     }

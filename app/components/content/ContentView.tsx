@@ -72,6 +72,15 @@ export function ContentView({
   const headerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null)
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [error])
+
+  useEffect(() => {
     // Only set up drop target in folder view
     if (viewType === 'library' || !headerRef.current) return
 
@@ -290,6 +299,13 @@ export function ContentView({
   return (
     <div className="space-y-8">
       {renderHeader()}
+      {error && (
+        <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center gap-2 px-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
+            <span>{error}</span>
+          </div>
+        </div>
+      )}
 
       <div className="rounded-lg border border-stripe-border bg-white shadow-stripe">
         {folders.length === 0 && files.length === 0 ? (

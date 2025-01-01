@@ -8,8 +8,7 @@ import { useRouter } from 'next/navigation'
 import { puckConfig } from '@/app/config/puck'
 import { toggleFileVisibility, copyFile } from '@/app/actions/file'
 import { getFolderContents } from '@/app/actions/folder'
-import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine'
-import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter'
+import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter'
 import invariant from 'tiny-invariant'
 
 interface FileItemProps {
@@ -22,6 +21,7 @@ interface FileItemProps {
   onItemMove?: (itemId: string, itemType: 'file' | 'folder') => void
 }
 
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 export function FileItem({ file, onDelete, onRename, onCopy, onItemMove }: FileItemProps) {
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
