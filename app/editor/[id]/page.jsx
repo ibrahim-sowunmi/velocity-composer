@@ -194,7 +194,7 @@ const ComponentSearch = () => {
   };
 
   return (
-    <div className="border-b border-gray-200">
+    <div className="border-b py-1 pb-4 border-gray-200">
       <div className="relative">
         <input
           type="text"
@@ -231,7 +231,7 @@ const ComponentSearch = () => {
       
       {/* Show matching components */}
       {matchingComponents.length > 0 && (
-        <div className="p-2 border-b border-gray-200">
+        <div className="m-4 border-b border-gray-200">
           <div className="text-xs font-medium text-gray-500 uppercase">
             Matching Components
           </div>
