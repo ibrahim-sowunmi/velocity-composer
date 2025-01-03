@@ -103,7 +103,12 @@ export function FileItem({ file, onDelete, onRename, onCopy, onItemMove }: FileI
     if (isEditing || (e.target as HTMLElement).closest('button, a')) {
       return
     }
-    router.push(`/view/${file.id}`)
+    // If puckData is null, undefined, or an empty object, redirect to editor page
+    if (!file.puckData || typeof file.puckData !== 'object' || Object.keys(file.puckData as object).length === 0) {
+      router.push(`/editor/${file.id}`)
+    } else {
+      router.push(`/view/${file.id}`)
+    }
   }
 
   const handleCopy = async () => {

@@ -103,7 +103,11 @@ export function FileSearch({ currentFolderId }: FileSearchProps) {
       e.preventDefault()
       const selectedFile = results[selectedIndex]
       if (selectedFile) {
-        router.push(`/view/${selectedFile.id}`)
+        if (!selectedFile.puckData || typeof selectedFile.puckData !== 'object' || Object.keys(selectedFile.puckData as object).length === 0) {
+          router.push(`/editor/${selectedFile.id}`)
+        } else {
+          router.push(`/view/${selectedFile.id}`)
+        }
       }
     }
   }
@@ -172,7 +176,13 @@ export function FileSearch({ currentFolderId }: FileSearchProps) {
                   className={`group p-4 hover:bg-stripe-light cursor-pointer ${
                     index === selectedIndex ? 'bg-stripe-light' : ''
                   } ${index !== results.length - 1 ? 'border-b border-stripe-border' : ''}`}
-                  onClick={() => router.push(`/view/${file.id}`)}
+                  onClick={() => {
+                    if (!file.puckData || typeof file.puckData !== 'object' || Object.keys(file.puckData as object).length === 0) {
+                      router.push(`/editor/${file.id}`)
+                    } else {
+                      router.push(`/view/${file.id}`)
+                    }
+                  }}
                 >
                   <div className="flex items-center justify-between">
                     <div className="min-w-0 flex-1">

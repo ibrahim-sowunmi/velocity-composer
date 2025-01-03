@@ -69,6 +69,11 @@ export const puckConfig = {
       components: [],
       defaultExpanded: false,
     },
+    crypto: {
+      title: "CRYPTO",
+      components: [],
+      defaultExpanded: false,
+    },
     climate: {
       title: "CLIMATE (Sustainability)",
       components: [],
