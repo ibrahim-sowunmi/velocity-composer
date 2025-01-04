@@ -1,6 +1,6 @@
 # Velocity Composer
 
-A web application for quickly creating and managing email templates, much less LLM wrangling. ;)
+An application for quickly creating and managing email templates, much less LLM wrangling. ;)
 
 ## Prerequisites
 

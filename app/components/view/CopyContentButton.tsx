@@ -2,13 +2,29 @@
 
 import { useState } from 'react'
 import { Copy, Check } from 'lucide-react'
+import 'prismjs/themes/prism-tomorrow.css'
+import 'prismjs/components/prism-javascript'
+import 'prismjs/components/prism-typescript'
+import 'prismjs/components/prism-jsx'
+import 'prismjs/components/prism-tsx'
+import 'prismjs/components/prism-css'
+import 'prismjs/components/prism-python'
+import 'prismjs/components/prism-java'
+import 'prismjs/components/prism-go'
+import 'prismjs/components/prism-rust'
+import 'prismjs/components/prism-json'
+import 'prismjs/components/prism-yaml'
+import 'prismjs/components/prism-markdown'
+import 'prismjs/components/prism-bash'
+import 'prismjs/components/prism-sql'
 
 interface CopyContentButtonProps {
   buttonBaseStyles: string
   getContent: () => string | Promise<string>
+  buttonText?: string
 }
 
-export function CopyContentButton({ buttonBaseStyles, getContent }: CopyContentButtonProps) {
+export function CopyContentButton({ buttonBaseStyles, getContent, buttonText = "Copy Code" }: CopyContentButtonProps) {
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -21,6 +37,64 @@ export function CopyContentButton({ buttonBaseStyles, getContent }: CopyContentB
       // Create a temporary container in memory
       const tempContainer = document.createElement('div')
       tempContainer.innerHTML = content
+
+      // Get Prism styles
+      const prismStyles = Array.from(document.styleSheets)
+        .filter(sheet => {
+          try {
+            return sheet.href?.includes('prism-tomorrow.css') || 
+                   Array.from(sheet.cssRules).some(rule => 
+                     rule.cssText.includes('.token') || 
+                     rule.cssText.includes('.language-')
+                   );
+          } catch {
+            return false;
+          }
+        })
+        .map(sheet => {
+          try {
+            return Array.from(sheet.cssRules)
+              .map(rule => rule.cssText)
+              .join('\n');
+          } catch {
+            return '';
+          }
+        })
+        .join('\n');
+
+      // Wrap content with styles
+      const wrappedContent = `
+        <div style="font-family: 'Open Sans', sans-serif;">
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600&display=swap');
+            ${prismStyles}
+            * {
+              font-family: 'Open Sans', sans-serif !important;
+              font-size: 12px !important;
+            }
+            pre, code, .token {
+              font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+              font-size: 10px !important;
+              line-height: 1.4 !important;
+            }
+            pre {
+              background: #2d2d2d !important;
+              padding: 0.5rem !important;
+              border-radius: 0.25rem !important;
+              overflow-x: auto !important;
+              margin: 0.25rem 0 !important;
+            }
+            code {
+              background: transparent !important;
+              padding: 0 !important;
+            }
+            .token {
+              font-size: 10px !important;
+            }
+          </style>
+          ${content}
+        </div>
+      `;
 
       // Handle images - convert them to canvas elements to ensure they're copied
       const images = tempContainer.getElementsByTagName('img')
@@ -131,7 +205,7 @@ export function CopyContentButton({ buttonBaseStyles, getContent }: CopyContentB
       if (navigator.clipboard && window.isSecureContext) {
         try {
           // Create a blob with HTML content type
-          const htmlBlob = new Blob([tempContainer.innerHTML], { type: 'text/html' })
+          const htmlBlob = new Blob([wrappedContent], { type: 'text/html' })
           // Also create a plain text version
           const plainTextBlob = new Blob([tempContainer.textContent || ''], { type: 'text/plain' })
           
@@ -143,13 +217,15 @@ export function CopyContentButton({ buttonBaseStyles, getContent }: CopyContentB
         } catch (clipboardErr) {
           console.error('Failed to use clipboard API:', clipboardErr)
           // If modern approach fails, try the selection approach
-          document.body.appendChild(tempContainer)
-          tempContainer.style.position = 'fixed'
-          tempContainer.style.pointerEvents = 'none'
-          tempContainer.style.opacity = '0'
+          const styledContainer = document.createElement('div')
+          styledContainer.innerHTML = wrappedContent
+          document.body.appendChild(styledContainer)
+          styledContainer.style.position = 'fixed'
+          styledContainer.style.pointerEvents = 'none'
+          styledContainer.style.opacity = '0'
           
           const range = document.createRange()
-          range.selectNodeContents(tempContainer)
+          range.selectNodeContents(styledContainer)
           
           const selection = window.getSelection()
           if (selection) {
@@ -163,19 +239,21 @@ export function CopyContentButton({ buttonBaseStyles, getContent }: CopyContentB
               throw new Error('Copy failed')
             } finally {
               selection.removeAllRanges()
-              tempContainer.remove()
+              styledContainer.remove()
             }
           }
         }
       } else {
         // Fallback for older browsers
-        document.body.appendChild(tempContainer)
-        tempContainer.style.position = 'fixed'
-        tempContainer.style.pointerEvents = 'none'
-        tempContainer.style.opacity = '0'
+        const styledContainer = document.createElement('div')
+        styledContainer.innerHTML = wrappedContent
+        document.body.appendChild(styledContainer)
+        styledContainer.style.position = 'fixed'
+        styledContainer.style.pointerEvents = 'none'
+        styledContainer.style.opacity = '0'
         
         const range = document.createRange()
-        range.selectNodeContents(tempContainer)
+        range.selectNodeContents(styledContainer)
         
         const selection = window.getSelection()
         if (selection) {
@@ -189,7 +267,7 @@ export function CopyContentButton({ buttonBaseStyles, getContent }: CopyContentB
             throw new Error('Copy failed')
           } finally {
             selection.removeAllRanges()
-            tempContainer.remove()
+            styledContainer.remove()
           }
         }
       }
@@ -212,7 +290,7 @@ export function CopyContentButton({ buttonBaseStyles, getContent }: CopyContentB
             ? 'bg-red-50 hover:bg-red-100 text-red-700 border border-red-200'
             : copied
             ? 'bg-green-600 hover:bg-green-600 text-white border border-green-600'
-            : 'bg-[#635BFF] hover:bg-[#635BFF]/90 text-white border border-[#635BFF]'
+            : 'bg-[#635BFF] hover:bg-[#635BFF] text-white border border-[#635BFF]'
         }`}
         title={error || "Copy to clipboard"}
       >
@@ -226,7 +304,7 @@ export function CopyContentButton({ buttonBaseStyles, getContent }: CopyContentB
         ) : (
           <div className="flex items-center gap-2">
             <Copy className="absolute left-4 h-5 w-5 transform transition-all duration-300 opacity-0 -translate-x-4 group-hover:translate-x-0 group-hover:opacity-100 text-white" />
-            <span className="transform transition-all duration-300 group-hover:translate-x-2">Copy Email</span>
+            <span className="transform transition-all duration-300 group-hover:translate-x-2">{buttonText}</span>
           </div>
         )}
       </button>

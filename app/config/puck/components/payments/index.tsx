@@ -93,7 +93,11 @@ export const PaymentComponents = {
       return (
         <div className="p-6 bg-white rounded-lg shadow-sm">
           <h2 className="text-xl font-bold mb-4">{title}</h2>
-          <p className="text-gray-700 mb-6">{description}</p>
+          <div className="text-gray-700 mb-6">
+            {description.split('\n').map((line, index) => (
+              <p key={index} className="mb-1">{line}</p>
+            ))}
+          </div>
           
           <div className="grid grid-cols-2 gap-6 mb-6">
             {bulletPoints && bulletPoints.length > 0 && (
@@ -227,7 +231,11 @@ export const PaymentComponents = {
       return (
         <div className="p-6 bg-white rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4">{title}</h2>
-          <p className="text-gray-700 mb-6">{description}</p>
+          <div className="text-gray-700 mb-6">
+            {description.split('\n').map((line, index) => (
+              <p key={index} className="mb-2">{line}</p>
+            ))}
+          </div>
           
           <div className="grid grid-cols-2 gap-6 mb-6">
             {bulletPoints && bulletPoints.length > 0 && (

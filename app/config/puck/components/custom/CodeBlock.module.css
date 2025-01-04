@@ -1,0 +1,107 @@
+.codeBlockWrapper {
+  margin: 1.5rem 0;
+  border: 1px solid #3a3a3a;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: #2d2d2d;
+}
+
+.codeBlockHeader {
+  background: #1a1a1a;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.codeBlockTitle {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.languageBadge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  background: #3a3a3a;
+  color: #ccc;
+  border-radius: 0.25rem;
+  text-transform: uppercase;
+}
+
+.codeBlock {
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  background: #2d2d2d;
+}
+
+.codeBlock code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+/* Override Prism styles */
+:global(.token.comment),
+:global(.token.prolog),
+:global(.token.doctype),
+:global(.token.cdata) {
+  color: #8b949e !important;
+}
+
+:global(.token.punctuation) {
+  color: #c9d1d9 !important;
+}
+
+:global(.token.property),
+:global(.token.tag),
+:global(.token.boolean),
+:global(.token.number),
+:global(.token.constant),
+:global(.token.symbol),
+:global(.token.deleted) {
+  color: #79c0ff !important;
+}
+
+:global(.token.selector),
+:global(.token.attr-name),
+:global(.token.string),
+:global(.token.char),
+:global(.token.builtin),
+:global(.token.inserted) {
+  color: #a5d6ff !important;
+}
+
+:global(.token.operator),
+:global(.token.entity),
+:global(.token.url),
+:global(.language-css .token.string),
+:global(.style .token.string) {
+  color: #d2a8ff !important;
+}
+
+:global(.token.atrule),
+:global(.token.attr-value),
+:global(.token.keyword) {
+  color: #ff7b72 !important;
+}
+
+:global(.token.function),
+:global(.token.class-name) {
+  color: #d2a8ff !important;
+}
+
+:global(.token.regex),
+:global(.token.important),
+:global(.token.variable) {
+  color: #ffa657 !important;
+} 

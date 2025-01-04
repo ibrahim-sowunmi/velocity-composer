@@ -148,6 +148,7 @@ const getDownscaledImage = async (file: File): Promise<{ blob: Blob, quality: nu
 
 export const ImageBlock: Config<{ ImageBlock: ImageBlockProps }>["components"] = {
   ImageBlock: {
+    label: "Image",
     fields: {
       imageSource: {
         type: "radio",
