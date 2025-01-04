@@ -50,58 +50,58 @@
   line-height: 1.7;
 }
 
-/* Override Prism styles */
-:global(.token.comment),
-:global(.token.prolog),
-:global(.token.doctype),
-:global(.token.cdata) {
+/* Prism syntax highlighting styles */
+.syntaxHighlighting :global(.token.comment),
+.syntaxHighlighting :global(.token.prolog),
+.syntaxHighlighting :global(.token.doctype),
+.syntaxHighlighting :global(.token.cdata) {
   color: #8b949e !important;
 }
 
-:global(.token.punctuation) {
+.syntaxHighlighting :global(.token.punctuation) {
   color: #c9d1d9 !important;
 }
 
-:global(.token.property),
-:global(.token.tag),
-:global(.token.boolean),
-:global(.token.number),
-:global(.token.constant),
-:global(.token.symbol),
-:global(.token.deleted) {
+.syntaxHighlighting :global(.token.property),
+.syntaxHighlighting :global(.token.tag),
+.syntaxHighlighting :global(.token.boolean),
+.syntaxHighlighting :global(.token.number),
+.syntaxHighlighting :global(.token.constant),
+.syntaxHighlighting :global(.token.symbol),
+.syntaxHighlighting :global(.token.deleted) {
   color: #79c0ff !important;
 }
 
-:global(.token.selector),
-:global(.token.attr-name),
-:global(.token.string),
-:global(.token.char),
-:global(.token.builtin),
-:global(.token.inserted) {
+.syntaxHighlighting :global(.token.selector),
+.syntaxHighlighting :global(.token.attr-name),
+.syntaxHighlighting :global(.token.string),
+.syntaxHighlighting :global(.token.char),
+.syntaxHighlighting :global(.token.builtin),
+.syntaxHighlighting :global(.token.inserted) {
   color: #a5d6ff !important;
 }
 
-:global(.token.operator),
-:global(.token.entity),
-:global(.token.url),
-:global(.language-css .token.string),
-:global(.style .token.string) {
+.syntaxHighlighting :global(.token.operator),
+.syntaxHighlighting :global(.token.entity),
+.syntaxHighlighting :global(.token.url),
+.syntaxHighlighting :global(.language-css .token.string),
+.syntaxHighlighting :global(.style .token.string) {
   color: #d2a8ff !important;
 }
 
-:global(.token.atrule),
-:global(.token.attr-value),
-:global(.token.keyword) {
+.syntaxHighlighting :global(.token.atrule),
+.syntaxHighlighting :global(.token.attr-value),
+.syntaxHighlighting :global(.token.keyword) {
   color: #ff7b72 !important;
 }
 
-:global(.token.function),
-:global(.token.class-name) {
+.syntaxHighlighting :global(.token.function),
+.syntaxHighlighting :global(.token.class-name) {
   color: #d2a8ff !important;
 }
 
-:global(.token.regex),
-:global(.token.important),
-:global(.token.variable) {
+.syntaxHighlighting :global(.token.regex),
+.syntaxHighlighting :global(.token.important),
+.syntaxHighlighting :global(.token.variable) {
   color: #ffa657 !important;
 } 

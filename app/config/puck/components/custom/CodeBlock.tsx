@@ -21,6 +21,7 @@ import 'prismjs/components/prism-yaml';
 import 'prismjs/components/prism-markdown';
 import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-sql';
+import 'prismjs/components/prism-ruby';
 
 type CodeBlockProps = {
   title: string;
@@ -48,12 +49,13 @@ const CodeBlockComponent: Config<{ CodeBlock: CodeBlockProps }>["components"] = 
           { label: "Python", value: "python" },
           { label: "Java", value: "java" },
           { label: "Go", value: "go" },
+          { label: "Ruby", value: "ruby" },
           { label: "Rust", value: "rust" },
           { label: "JSON", value: "json" },
           { label: "YAML", value: "yaml" },
           { label: "Markdown", value: "markdown" },
           { label: "Bash", value: "bash" },
-          { label: "SQL", value: "sql" }
+          { label: "SQL", value: "sql" },
         ]
       },
       code: {
@@ -83,22 +85,25 @@ const paymentIntent = await stripe.paymentIntents.create({
 `
     },
     render: ({ title, language, code }) => {
+      // Disable ESLint for hooks in Puck render function
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       React.useEffect(() => {
         if (typeof window !== 'undefined') {
           Prism.highlightAll();
         }
       }, [code, language]);
 
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       const formattedCode = React.useMemo(() => {
         try {
           return code.trim();
-        } catch (error) {
+        } catch {
           return code;
         }
       }, [code]);
 
       return (
-        <div className={styles.codeBlockWrapper}>
+        <div className={`${styles.codeBlockWrapper} ${styles.syntaxHighlighting}`}>
           <div className={styles.codeBlockHeader}>
             <h3 className={styles.codeBlockTitle}>{title}</h3>
             <div className={styles.headerActions}>

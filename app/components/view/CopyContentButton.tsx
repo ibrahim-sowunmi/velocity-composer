@@ -24,7 +24,7 @@ interface CopyContentButtonProps {
   buttonText?: string
 }
 
-export function CopyContentButton({ buttonBaseStyles, getContent, buttonText = "Copy Code" }: CopyContentButtonProps) {
+export function CopyContentButton({ buttonBaseStyles, getContent, buttonText = "Copy Email" }: CopyContentButtonProps) {
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
