@@ -380,7 +380,8 @@ export async function searchPublicFiles(query: string) {
       files: files.map(file => ({
         ...file,
         creatorEmail: file.user.email
-      }))
+      })),
+      currentUserEmail: session.user.email
     }
   } catch (error) {
     console.error('Failed to search files:', error);

@@ -10,12 +10,14 @@ import { useRouter } from 'next/navigation'
 
 interface SearchResult extends Omit<File, 'user'> {
   creatorEmail: string
+  currentUserEmail?: string
 }
 
 interface SearchResponse {
   success: boolean
   files?: SearchResult[]
   error?: string
+  currentUserEmail?: string
 }
 
 interface ForkResponse {
@@ -38,6 +40,7 @@ export function FileSearch({ currentFolderId }: FileSearchProps) {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
+  const [currentUserEmail, setCurrentUserEmail] = useState<string>()
 
   const formatDate = (date: Date) => {
     const d = new Date(date)
@@ -62,6 +65,7 @@ export function FileSearch({ currentFolderId }: FileSearchProps) {
         const result = await searchPublicFiles(debouncedQuery) as SearchResponse
         if (result.success && result.files) {
           setResults(result.files)
+          setCurrentUserEmail(result.currentUserEmail)
         } else {
           setError(result.error || 'Failed to search files')
         }
@@ -90,6 +94,21 @@ export function FileSearch({ currentFolderId }: FileSearchProps) {
     }
   }
 
+  const handleFileNavigation = (file: SearchResult) => {
+    const isEmpty = !file.puckData || typeof file.puckData !== 'object' || Object.keys(file.puckData as object).length === 0
+    const isOwner = currentUserEmail === file.creatorEmail
+
+    if (isEmpty) {
+      if (isOwner) {
+        router.push(`/editor/${file.id}`)
+      } else {
+        alert('This file is empty')
+      }
+    } else {
+      router.push(`/view/${file.id}`)
+    }
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault()
@@ -103,11 +122,7 @@ export function FileSearch({ currentFolderId }: FileSearchProps) {
       e.preventDefault()
       const selectedFile = results[selectedIndex]
       if (selectedFile) {
-        if (!selectedFile.puckData || typeof selectedFile.puckData !== 'object' || Object.keys(selectedFile.puckData as object).length === 0) {
-          router.push(`/editor/${selectedFile.id}`)
-        } else {
-          router.push(`/view/${selectedFile.id}`)
-        }
+        handleFileNavigation(selectedFile)
       }
     }
   }
@@ -176,13 +191,7 @@ export function FileSearch({ currentFolderId }: FileSearchProps) {
                   className={`group p-4 hover:bg-stripe-light cursor-pointer ${
                     index === selectedIndex ? 'bg-stripe-light' : ''
                   } ${index !== results.length - 1 ? 'border-b border-stripe-border' : ''}`}
-                  onClick={() => {
-                    if (!file.puckData || typeof file.puckData !== 'object' || Object.keys(file.puckData as object).length === 0) {
-                      router.push(`/editor/${file.id}`)
-                    } else {
-                      router.push(`/view/${file.id}`)
-                    }
-                  }}
+                  onClick={() => handleFileNavigation(file)}
                 >
                   <div className="flex items-center justify-between">
                     <div className="min-w-0 flex-1">
