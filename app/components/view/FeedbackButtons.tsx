@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useTransition } from 'react'
 import { ThumbsUp, ThumbsDown } from 'lucide-react'
 import { CommentsButton } from './CommentsButton'
 import { useParams } from 'next/navigation'
@@ -12,7 +12,11 @@ interface VoteState {
   userVote: boolean | null
 }
 
-export function FeedbackButtons() {
+interface FeedbackButtonsProps {
+  onOpenComments: () => void
+}
+
+export function FeedbackButtons({ onOpenComments }: FeedbackButtonsProps) {
   const params = useParams()
   const fileId = params?.id as string
   const [voteState, setVoteState] = useState<VoteState>({
@@ -22,11 +26,7 @@ export function FeedbackButtons() {
   })
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    fetchVotes()
-  }, [fileId])
-
-  const fetchVotes = async () => {
+  const fetchVotes = useCallback(async () => {
     try {
       const result = await getVotes(fileId)
       if (result.success && 'upvotes' in result) {
@@ -41,7 +41,11 @@ export function FeedbackButtons() {
     } catch (error) {
       console.error('Error fetching votes:', error)
     }
-  }
+  }, [fileId])
+
+  useEffect(() => {
+    fetchVotes()
+  }, [fetchVotes])
 
   const handleVote = async (isUpvote: boolean) => {
     if (isLoading) return
@@ -83,13 +87,15 @@ export function FeedbackButtons() {
     }
   }
 
+  const buttonBaseStyles = "p-3 rounded-lg transition-all duration-300 z-50 flex items-center gap-2 text-sm font-medium justify-center relative"
+
   return (
     <div className="fixed bottom-6 left-6 flex items-center gap-3">
-      <CommentsButton />
+      <CommentsButton buttonBaseStyles={buttonBaseStyles} onOpenComments={onOpenComments} />
       <button
         onClick={() => handleVote(false)}
         disabled={isLoading}
-        className={`p-3 rounded-lg transition-all duration-300 z-50 flex items-center gap-2 text-sm font-medium justify-center relative ${
+        className={`${buttonBaseStyles} ${
           voteState.userVote === false
             ? 'bg-red-500 text-white border border-red-500' 
             : 'bg-white text-red-500 border border-red-500 hover:bg-red-500 hover:text-white'
@@ -103,7 +109,7 @@ export function FeedbackButtons() {
       <button
         onClick={() => handleVote(true)}
         disabled={isLoading}
-        className={`p-3 rounded-lg transition-all duration-300 z-50 flex items-center gap-2 text-sm font-medium justify-center relative ${
+        className={`${buttonBaseStyles} ${
           voteState.userVote === true
             ? 'bg-[#635BFF] text-white border border-[#635BFF]' 
             : 'bg-white text-[#635BFF] border border-[#635BFF] hover:bg-[#635BFF] hover:text-white'
@@ -114,7 +120,6 @@ export function FeedbackButtons() {
           Helpful
         </span>
       </button>
-      
     </div>
   )
 } 

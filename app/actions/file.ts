@@ -85,7 +85,8 @@ export async function getFileData(id: string) {
         ...file,
         canEdit: file.userId === user.id
       },
-      currentUserId: user.id
+      currentUserId: user.id,
+      currentUserEmail: session.user.email
     }
   } catch (error) {
     console.error('Failed to get file data:', error);
