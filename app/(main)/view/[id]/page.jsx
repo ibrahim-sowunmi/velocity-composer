@@ -7,6 +7,7 @@ import { getFileData } from "@/app/actions/file"
 import { use } from "react"
 import { puckConfig } from "@/app/config/puck"
 import { ViewButtonMenu } from "@/app/components/view/ViewButtonMenu"
+import { FeedbackButtons } from "@/app/components/view/FeedbackButtons"
 
 export default function ViewPage({ params }) {
   const unwrappedParams = use(params)
@@ -97,6 +98,7 @@ export default function ViewPage({ params }) {
         <Render config={puckConfig} data={data} />
       </div>
       <ViewButtonMenu getContent={getTextContent} canEdit={isOwner} />
+      <FeedbackButtons />
     </>
   )
 }

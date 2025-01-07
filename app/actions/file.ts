@@ -349,7 +349,7 @@ export async function toggleFileVisibility(id: string) {
 
 export async function searchPublicFiles(query: string) {
   const session = await auth()
-  if (!session || !session.user) {
+  if (!session?.user?.email) {
     return { success: false, error: 'Unauthorized' }
   }
 
@@ -362,7 +362,19 @@ export async function searchPublicFiles(query: string) {
           mode: 'insensitive'
         }
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        folderId: true,
+        productList: true,
+        puckData: true,
+        userId: true,
+        isPublic: true,
+        originalFileId: true,
+        upvoteCount: true,
+        downvoteCount: true,
+        createdAt: true,
+        updatedAt: true,
         user: {
           select: {
             email: true
@@ -379,7 +391,8 @@ export async function searchPublicFiles(query: string) {
       success: true, 
       files: files.map(file => ({
         ...file,
-        creatorEmail: file.user.email
+        creatorEmail: file.user.email,
+        totalVotes: file.upvoteCount + file.downvoteCount
       })),
       currentUserEmail: session.user.email
     }
