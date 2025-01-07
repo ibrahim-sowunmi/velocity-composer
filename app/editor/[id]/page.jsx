@@ -9,6 +9,7 @@ import { puckConfig } from "@/app/config/puck"
 import Link from "next/link"
 import { Loader } from "lucide-react"
 import { ChevronRight } from "lucide-react"
+
 // Navigation Buttons Component
 const NavigationButtons = ({ file }) => {
   return (
@@ -45,50 +46,27 @@ const NavigationButtons = ({ file }) => {
 
 // Custom Publish Button Component
 const CustomPublishButton = ({ fileId, onPublish }) => {
-  const { appState } = usePuck()
-  const [isSuccess, setIsSuccess] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+  const { dispatch, appState } = usePuck()
 
-  const handleSave = async () => {
+  const handlePublish = async () => {
     try {
-      setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
       const result = await saveFileData(fileId, appState.data)
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to save')
+      if (result.success) {
+        onPublish()
+      } else {
+        console.error('Failed to save:', result.error)
       }
-      // Show success state
-      setIsSuccess(true)
-      setTimeout(() => setIsSuccess(false), 1000)
-      onPublish()
-
-    } catch (err) {
-      console.error('Save error:', err)
-      alert('Failed to save changes')
-    } finally {
-      setIsSaving(false)
+    } catch (error) {
+      console.error('Error saving:', error)
     }
   }
 
   return (
     <button
-      onClick={handleSave}
-      disabled={isSaving}
-      className={`
-        inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md
-        shadow-stripe-sm transition-all duration-500
-        min-w-[100px] h-[36px] w-[100px]
-        ${isSuccess
-          ? 'bg-green-600 text-white hover:bg-green-700'
-          : 'bg-stripe-primary text-white hover:bg-stripe-primary-dark'
-        } 
-        hover:shadow-stripe
-        disabled:opacity-70 disabled:cursor-not-allowed 
-        disabled:hover:shadow-stripe-sm
-      `}
+      onClick={handlePublish}
+      className="inline-flex items-center gap-2 px-4 py-2 bg-stripe-primary text-white text-sm font-medium rounded-md hover:bg-stripe-primary-dark shadow-stripe-sm hover:shadow-stripe transition-all"
     >
-      {isSaving ? <Loader className="animate-spin h-4 w-4" /> : 'Publish'}
+      Publish Changes
     </button>
   )
 }
@@ -127,51 +105,23 @@ const ComponentSearch = () => {
     const updatedComponentList = {};
     
     Object.entries(appState.ui.componentList).forEach(([category, data]) => {
-      const components = data.components || [];
+      // Skip if not an object or no components
+      if (typeof data !== 'object' || !data.components) return;
       
-      // Check for matches in component titles
-      const matchingComponents = components.filter(comp => {
-        // Get the component's display title
-        const componentConfig = puckConfig.components[comp];
-        let displayTitle = '';
+      // Check each component in the category
+      Object.entries(data.components).forEach(([name, comp]) => {
+        const componentTitle = comp.label || name;
+        const titleMatch = componentTitle.toLowerCase().includes(searchLower);
+        const categoryMatch = category.toLowerCase().includes(searchLower);
         
-        // Handle different naming patterns
-        if (comp === 'AutomaticCardUpdates') {
-          displayTitle = 'Automatic Card Updater';
-        } else {
-          displayTitle = componentConfig?.title || 
-                        comp.replace(/([A-Z])/g, ' $1').trim();
+        if (titleMatch || categoryMatch) {
+          matches.push({
+            title: componentTitle,
+            category: category
+          });
         }
-        
-        // Split search term into words for more precise matching
-        const searchWords = searchLower.split(' ').filter(word => word.length > 0);
-        const titleWords = displayTitle.toLowerCase().split(' ');
-        
-        // Check if all search words match the start of any title words
-        return searchWords.every(searchWord => 
-          titleWords.some(titleWord => titleWord.startsWith(searchWord))
-        );
       });
-
-      // Store matches for suggestions with their display titles
-      if (matchingComponents.length > 0) {
-        matches.push(...matchingComponents.map(comp => {
-          let displayTitle = '';
-          if (comp === 'AutomaticCardUpdates') {
-            displayTitle = 'Automatic Card Updater';
-          } else {
-            displayTitle = puckConfig.components[comp]?.title || 
-                          comp.replace(/([A-Z])/g, ' $1').trim();
-          }
-          
-          return {
-            name: comp,
-            title: displayTitle,
-            category: data.title || category
-          };
-        }));
-      }
-
+      
       // Update category state
       updatedComponentList[category] = {
         ...data,
@@ -228,7 +178,7 @@ const ComponentSearch = () => {
           </button>
         )}
       </div>
-      
+
       {/* Show matching components */}
       {matchingComponents.length > 0 && (
         <div className="m-4 border-b border-gray-200">
@@ -251,7 +201,7 @@ const ComponentSearch = () => {
       )}
     </div>
   );
-};
+}
 
 // Editor Component
 function Editor({ fileId }) {

@@ -19,7 +19,11 @@ model User {
   // Add relations for files and folders
   folders       Folder[]
   files         File[]
- 
+  // Add relation for votes
+  votes         Vote[]
+  // Comments relation
+  comments      Comment[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -113,7 +117,42 @@ model File {
   isPublic    Boolean   @default(false)
   // Reference to original file if this is a fork
   originalFileId String?
+  // Vote related fields
+  votes       Vote[]
+  upvoteCount Int      @default(0)
+  downvoteCount Int    @default(0)
+  // Comments relation
+  comments    Comment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  fileId    String
+  userId    String
+  isUpvote  Boolean
+  file      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([fileId, userId])
+  @@index([fileId])
+  @@index([userId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  fileId    String
+  userId    String
+  file      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([fileId])
+  @@index([userId])
 }

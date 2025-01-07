@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { File } from '@prisma/client'
-import { SearchIcon, CopyIcon, EyeIcon, Loader2Icon } from 'lucide-react'
+import { SearchIcon, CopyIcon, EyeIcon, Loader2Icon, ThumbsUp } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
 import { searchPublicFiles, forkFile } from '@/app/actions/file'
 import Link from 'next/link'
@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation'
 interface SearchResult extends Omit<File, 'user'> {
   creatorEmail: string
   currentUserEmail?: string
+  totalVotes: number
 }
 
 interface SearchResponse {
@@ -195,9 +196,11 @@ export function FileSearch({ currentFolderId }: FileSearchProps) {
                 >
                   <div className="flex items-center justify-between">
                     <div className="min-w-0 flex-1">
-                      <h4 className="text-sm font-medium text-stripe-text truncate group-hover:text-stripe-primary transition-colors">
-                        {file.name}
-                      </h4>
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-medium text-stripe-text truncate group-hover:text-stripe-primary transition-colors">
+                          {file.name}
+                        </h4>
+                      </div>
                       <div className="mt-1 flex items-center gap-2 text-xs text-stripe-muted">
                         <span>{file.creatorEmail.split('@')[0]}</span>
                         <span>•</span>
@@ -217,6 +220,18 @@ export function FileSearch({ currentFolderId }: FileSearchProps) {
                       </div>
                     </div>
                     <div className="ml-4 flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                      <div 
+                        className={`p-2 rounded-lg flex items-center gap-1 ${
+                          file.upvoteCount - file.downvoteCount > 0
+                            ? 'bg-[#635BFF] text-white'
+                            : 'bg-white text-[#635BFF] border border-[#635BFF]'
+                        }`}
+                      >
+                        <ThumbsUp className="h-4 w-4" />
+                        <span className="text-sm font-medium">
+                          {file.upvoteCount - file.downvoteCount}
+                        </span>
+                      </div>
                       <button
                         onClick={() => handleFork(file.id)}
                         className="p-2 text-stripe-muted hover:text-stripe-text rounded-lg hover:bg-white hover:shadow-stripe transition-all duration-200"

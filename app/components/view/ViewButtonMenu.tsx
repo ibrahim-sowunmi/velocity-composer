@@ -9,13 +9,12 @@ import { ExportPDFButton } from './ExportPDFButton'
 
 interface ViewButtonMenuProps {
   getContent: () => string | Promise<string>
-  canEdit?: boolean
+  canEdit: boolean
 }
 
 export function ViewButtonMenu({ getContent, canEdit }: ViewButtonMenuProps) {
   const params = useParams()
   const fileId = params?.id as string
-
   const buttonBaseStyles = "p-3 rounded-lg transition-all duration-300 z-50 flex items-center gap-2 text-sm font-medium w-[180px] justify-center relative"
 
   return (
