@@ -44,7 +44,7 @@ export default async function Home() {
         <div className="max-w-5xl mx-auto px-6 py-24 text-center space-y-12">
           {/* Main heading with gradient */}
           <h1 className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-violet-600 mb-6">
-            Velocity Email Composer
+            Velocity Composer
           </h1>
 
           {/* Subheader with value proposition */}

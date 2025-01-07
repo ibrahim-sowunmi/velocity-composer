@@ -17,7 +17,7 @@ export default async function Navbar() {
           <span className="bg-gradient-to-r from-stripe-primary to-stripe-primary-dark bg-clip-text text-transparent">
           Velocity
           </span>
-          <span>Email Composer</span>
+          <span> Composer</span>
         </Link>
 
         <div className="flex items-center gap-6">

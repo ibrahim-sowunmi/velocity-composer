@@ -293,8 +293,8 @@ export function ContentView({
   }
 
   const emptyStateMessage = viewType === 'library' 
-    ? "No emails yet. Create a new email to get started."
-    : "This folder is empty. Create a new email to get started."
+    ? "Nothing here yet. Create a new  to get started."
+    : "This folder is empty. Create a new file to get started."
 
   return (
     <div className="space-y-8">

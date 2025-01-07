@@ -5,7 +5,7 @@ import { BackToLibraryButton } from './BackToLibraryButton'
 import { EditContentButton } from './EditContentButton'
 import { CopyContentButton } from './CopyContentButton'
 import { ForkContentButton } from './ForkContentButton'
-import { ExportPDFButton } from './ExportPDFButton'
+import ExportPDFButton from './ExportPDFButton'
 
 interface ViewButtonMenuProps {
   getContent: () => string | Promise<string>
