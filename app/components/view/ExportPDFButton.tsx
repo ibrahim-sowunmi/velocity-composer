@@ -2,13 +2,14 @@
 
 import { useState } from 'react'
 import { FileDown } from 'lucide-react'
+import html2pdf from 'html2pdf.js'
 
 interface ExportPDFButtonProps {
   buttonBaseStyles: string
   getContent: () => string | Promise<string>
 }
 
-export default function ExportPDFButton({ buttonBaseStyles, getContent }: ExportPDFButtonProps) {
+export function ExportPDFButton({ buttonBaseStyles, getContent }: ExportPDFButtonProps) {
   const [isExporting, setIsExporting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -17,18 +18,15 @@ export default function ExportPDFButton({ buttonBaseStyles, getContent }: Export
       setIsExporting(true)
       setError(null)
       
-      // Get the content
       const content = await Promise.resolve(getContent())
-      if (!content) {
-        throw new Error('No content to export')
-      }
+      if (!content) return
 
       // Create a temporary container with the content
       const container = document.createElement('div')
       container.innerHTML = content
       container.style.padding = '20px'
       
-      // Add custom styles for better PDF formatting
+      // Add custom styles for bullet points and list items
       const styleSheet = document.createElement('style')
       styleSheet.textContent = `
         ul, ol {
@@ -50,57 +48,14 @@ export default function ExportPDFButton({ buttonBaseStyles, getContent }: Export
           line-height: 1;
           top: -0.15em;
           left: -0.7em;
-          color: #4a5568;
-        }
-        pre, code {
-          background-color: #f7f7f7;
-          border-radius: 4px;
-          padding: 0.2em 0.4em;
-          font-family: 'Courier New', Courier, monospace;
-        }
-        pre {
-          padding: 1em;
-          overflow-x: auto;
-          margin: 1em 0;
-        }
-        pre code {
-          padding: 0;
-          background: none;
-        }
-        blockquote {
-          margin: 1em 0;
-          padding-left: 1em;
-          border-left: 4px solid #e2e8f0;
-          color: #4a5568;
-        }
-        img {
-          max-width: 100%;
-          height: auto;
-          margin: 1em 0;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin: 1em 0;
-        }
-        th, td {
-          border: 1px solid #e2e8f0;
-          padding: 0.5em;
-          text-align: left;
-        }
-        th {
-          background-color: #f7fafc;
         }
       `
       container.appendChild(styleSheet)
       document.body.appendChild(container)
 
-      // Dynamically import html2pdf only on client side
-      const html2pdf = (await import('html2pdf.js')).default
-
       const opt = {
         margin: [10, 10],
-        filename: 'solution-template.pdf',
+        filename: 'email-template.pdf',
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
           scale: 2,
@@ -117,11 +72,11 @@ export default function ExportPDFButton({ buttonBaseStyles, getContent }: Export
       try {
         await html2pdf().set(opt).from(container).save()
       } finally {
-        // Clean up the temporary container
+        // Clean up
         container.remove()
       }
     } catch (err) {
-      console.error('Failed to export PDF:', err)
+      console.error('Error exporting PDF:', err)
       setError(err instanceof Error ? err.message : 'Failed to export PDF')
     } finally {
       setIsExporting(false)
@@ -133,12 +88,12 @@ export default function ExportPDFButton({ buttonBaseStyles, getContent }: Export
       type="button"
       onClick={handleExport}
       disabled={isExporting}
-      className={`${buttonBaseStyles} group relative flex items-center justify-center px-6 py-2 text-sm font-medium transition-all duration-300 ${
+      className={`${buttonBaseStyles} group ${
         error 
-          ? 'bg-red-50 hover:bg-red-100 text-red-700 border border-red-200'
+          ? 'bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 shadow-sm rounded-md'
           : isExporting
-          ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
-          : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200'
+          ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed shadow-sm rounded-md'
+          : 'bg-white hover:bg-gray-50 text-gray-600 border border-gray-200 shadow-sm rounded-md hover:text-gray-900'
       }`}
       title={error || "Export to PDF"}
     >

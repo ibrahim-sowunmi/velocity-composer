@@ -1,0 +1,201 @@
+.richTextEditor {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.menuBar {
+  padding: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.menuBar button {
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  color: #374151;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  transition: all 0.2s;
+}
+
+.menuBar button:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.menuBar button.isActive {
+  background-color: #e5e7eb;
+  border-color: #9ca3af;
+  color: #111827;
+}
+
+.richTextBlock {
+  font-family: inherit;
+  line-height: 1.6;
+  color: inherit;
+  max-width: 100%;
+}
+
+.richTextBlock :global(.ProseMirror) {
+  outline: none;
+  min-height: 100px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  padding: 1rem;
+}
+
+.proseMirror {
+  width: 100%;
+}
+
+/* Headings */
+.richTextBlock h1 {
+  font-size: 2em;
+  margin: 0.67em 0;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.richTextBlock h2 {
+  font-size: 1.5em;
+  margin: 0.83em 0;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.richTextBlock h3 {
+  font-size: 1.17em;
+  margin: 1em 0;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Paragraphs and spacing */
+.richTextBlock p {
+  margin: 0;
+  min-height: 1.5em;
+}
+
+.richTextBlock p:empty::before {
+  content: '';
+  display: inline-block;
+}
+
+/* Lists */
+.richTextBlock ul, .richTextBlock ol {
+  padding-left: 2em;
+  margin: 0.5em 0;
+}
+
+.listItem {
+  position: relative;
+  padding-left: 0.5em;
+}
+
+.richTextBlock ul {
+  list-style-type: disc;
+}
+
+.richTextBlock ol {
+  list-style-type: decimal;
+}
+
+/* Nested lists */
+.richTextBlock ul ul,
+.richTextBlock ol ol,
+.richTextBlock ul ol,
+.richTextBlock ol ul {
+  margin: 0;
+}
+
+/* Blockquotes */
+.richTextBlock blockquote {
+  margin: 1em 0;
+  padding-left: 1em;
+  border-left: 4px solid #e5e7eb;
+  color: #6b7280;
+}
+
+/* Code blocks */
+.richTextBlock code {
+  background-color: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25em;
+  font-family: ui-monospace, monospace;
+}
+
+.richTextBlock pre {
+  background-color: #1f2937;
+  color: #e5e7eb;
+  padding: 1em;
+  border-radius: 0.5em;
+  overflow-x: auto;
+}
+
+.richTextBlock pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+/* Links */
+.link {
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link:hover {
+  color: #1d4ed8;
+}
+
+/* Images */
+.image {
+  max-width: 100%;
+  height: auto;
+  margin: 0.5em 0;
+  border-radius: 0.5em;
+}
+
+/* Text alignment */
+.richTextBlock :global(.ProseMirror) [style*="text-align: left"] {
+  text-align: left;
+}
+
+.richTextBlock :global(.ProseMirror) [style*="text-align: center"] {
+  text-align: center;
+}
+
+.richTextBlock :global(.ProseMirror) [style*="text-align: right"] {
+  text-align: right;
+}
+
+.richTextBlock :global(.ProseMirror) [style*="text-align: justify"] {
+  text-align: justify;
+}
+
+/* Preserve line height and spacing from Google Docs */
+.richTextBlock :global(.ProseMirror) [style*="line-height"] {
+  line-height: inherit !important;
+}
+
+/* Handle background colors */
+.richTextBlock :global(.ProseMirror) [style*="background-color"] {
+  padding: 0 0.2em;
+  border-radius: 0.2em;
+}
+
+/* Handle text colors */
+.richTextBlock :global(.ProseMirror) [style*="color:"] {
+  color: inherit;
+} 

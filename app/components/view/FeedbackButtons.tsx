@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useTransition } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { ThumbsUp, ThumbsDown } from 'lucide-react'
 import { CommentsButton } from './CommentsButton'
 import { useParams } from 'next/navigation'
@@ -87,7 +87,7 @@ export function FeedbackButtons({ onOpenComments }: FeedbackButtonsProps) {
     }
   }
 
-  const buttonBaseStyles = "p-3 rounded-lg transition-all duration-300 z-50 flex items-center gap-2 text-sm font-medium justify-center relative"
+  const buttonBaseStyles = "py-2.5 px-3 rounded-lg transition-all duration-300 z-50 flex items-center gap-2 text-sm font-medium justify-center relative shadow-sm"
 
   return (
     <div className="fixed bottom-6 left-6 flex items-center gap-3">
@@ -98,10 +98,11 @@ export function FeedbackButtons({ onOpenComments }: FeedbackButtonsProps) {
         className={`${buttonBaseStyles} ${
           voteState.userVote === false
             ? 'bg-red-500 text-white border border-red-500' 
-            : 'bg-white text-red-500 border border-red-500 hover:bg-red-500 hover:text-white'
-        } group w-[140px]`}
+            : 'bg-white text-red-500 border border-red-200 hover:bg-red-50 hover:border-red-300'
+        } group w-[180px]`}
+        title="Not Helpful"
       >
-        <ThumbsDown className="absolute left-4 h-4 w-4 transform transition-all duration-300 opacity-0 -translate-x-4 group-hover:translate-x-0 group-hover:opacity-100" />
+        <ThumbsDown className="absolute left-4 h-5 w-5 transform transition-all duration-300 opacity-0 -translate-x-4 group-hover:translate-x-0 group-hover:opacity-100" />
         <span className="transform transition-all duration-300 group-hover:translate-x-2">
           Not Helpful
         </span>
@@ -112,10 +113,11 @@ export function FeedbackButtons({ onOpenComments }: FeedbackButtonsProps) {
         className={`${buttonBaseStyles} ${
           voteState.userVote === true
             ? 'bg-[#635BFF] text-white border border-[#635BFF]' 
-            : 'bg-white text-[#635BFF] border border-[#635BFF] hover:bg-[#635BFF] hover:text-white'
-        } group w-[140px]`}
+            : 'bg-white text-[#635BFF] border border-[#635BFF] hover:bg-[#635BFF]/5 hover:border-[#635BFF]'
+        } group w-[180px]`}
+        title="Helpful"
       >
-        <ThumbsUp className="absolute left-4 h-4 w-4 transform transition-all duration-300 opacity-0 -translate-x-4 group-hover:translate-x-0 group-hover:opacity-100" />
+        <ThumbsUp className="absolute left-4 h-5 w-5 transform transition-all duration-300 opacity-0 -translate-x-4 group-hover:translate-x-0 group-hover:opacity-100" />
         <span className="transform transition-all duration-300 group-hover:translate-x-2">
           Helpful
         </span>
