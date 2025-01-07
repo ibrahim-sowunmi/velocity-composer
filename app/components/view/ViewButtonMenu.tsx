@@ -5,6 +5,7 @@ import { BackToLibraryButton } from './BackToLibraryButton'
 import { EditContentButton } from './EditContentButton'
 import { CopyContentButton } from './CopyContentButton'
 import { ForkContentButton } from './ForkContentButton'
+import { ExportPDFButton } from './ExportPDFButton'
 
 interface ViewButtonMenuProps {
   getContent: () => string | Promise<string>
@@ -22,6 +23,7 @@ export function ViewButtonMenu({ getContent, canEdit }: ViewButtonMenuProps) {
       <BackToLibraryButton buttonBaseStyles={buttonBaseStyles} />
       {canEdit && <EditContentButton buttonBaseStyles={buttonBaseStyles} fileId={fileId} />}
       {!canEdit && <ForkContentButton buttonBaseStyles={buttonBaseStyles} fileId={fileId} />}
+      <ExportPDFButton buttonBaseStyles={buttonBaseStyles} getContent={getContent} />
       <CopyContentButton buttonBaseStyles={buttonBaseStyles} getContent={getContent} />
     </div>
   )
