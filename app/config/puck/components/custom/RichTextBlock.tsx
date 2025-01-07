@@ -139,7 +139,7 @@ type RichTextBlockProps = {
 
 const RichTextBlockComponent: Config<{ RichTextBlock: RichTextBlockProps }>["components"] = {
   RichTextBlock: {
-    label: "Rich Text Block",
+    label: "Rich Text Area",
     fields: {
       content: {
         type: "custom",

@@ -32,6 +32,7 @@ export default function ViewPageClient({
 }: ViewPageClientProps) {
   const params = useParams()
   const [isCommentsOpen, setIsCommentsOpen] = useState(false)
+  const [commentCount, setCommentCount] = useState(0)
   const contentRef = useRef<HTMLDivElement>(null)
 
   const getTextContent = useCallback((): Promise<string> => {
@@ -53,6 +54,10 @@ export default function ViewPageClient({
     setIsCommentsOpen(false)
   }, [])
 
+  const handleCommentCountChange = useCallback((count: number) => {
+    setCommentCount(count)
+  }, [])
+
   const isOwner = Boolean(currentUserId && fileData?.userId === currentUserId)
 
   return (
@@ -64,12 +69,16 @@ export default function ViewPageClient({
         getContent={getTextContent} 
         canEdit={isOwner} 
       />
-      <FeedbackButtons onOpenComments={handleOpenComments} />
+      <FeedbackButtons 
+        onOpenComments={handleOpenComments} 
+        commentCount={commentCount}
+      />
       <CommentSlider 
         fileId={params.id as string}
         isOpen={isCommentsOpen}
         onClose={handleCloseComments}
         currentUserEmail={currentUserEmail}
+        onCommentCountChange={handleCommentCountChange}
       />
     </>
   )

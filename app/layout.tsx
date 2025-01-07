@@ -6,6 +6,8 @@ const openSans = Open_Sans({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-open-sans',
+  preload: true,
+  weight: ['300', '400', '500', '600', '700', '800']
 })
 
 export default function RootLayout({

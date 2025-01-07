@@ -14,9 +14,10 @@ interface VoteState {
 
 interface FeedbackButtonsProps {
   onOpenComments: () => void
+  commentCount: number
 }
 
-export function FeedbackButtons({ onOpenComments }: FeedbackButtonsProps) {
+export function FeedbackButtons({ onOpenComments, commentCount }: FeedbackButtonsProps) {
   const params = useParams()
   const fileId = params?.id as string
   const [voteState, setVoteState] = useState<VoteState>({
@@ -91,7 +92,11 @@ export function FeedbackButtons({ onOpenComments }: FeedbackButtonsProps) {
 
   return (
     <div className="fixed bottom-6 left-6 flex items-center gap-3">
-      <CommentsButton buttonBaseStyles={buttonBaseStyles} onOpenComments={onOpenComments} />
+      <CommentsButton 
+        buttonBaseStyles={buttonBaseStyles} 
+        onOpenComments={onOpenComments} 
+        commentCount={commentCount}
+      />
       <button
         onClick={() => handleVote(false)}
         disabled={isLoading}

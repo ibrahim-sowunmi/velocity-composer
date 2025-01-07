@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { FileDown } from 'lucide-react'
-import html2pdf from 'html2pdf.js'
 
 interface ExportPDFButtonProps {
   buttonBaseStyles: string
@@ -17,6 +16,9 @@ export function ExportPDFButton({ buttonBaseStyles, getContent }: ExportPDFButto
     try {
       setIsExporting(true)
       setError(null)
+      
+      // Dynamically import html2pdf only when needed
+      const html2pdf = (await import('html2pdf.js')).default
       
       const content = await Promise.resolve(getContent())
       if (!content) return
